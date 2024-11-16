@@ -5,7 +5,7 @@ const dimensions = {
     headerHeight: 60,
     contentMargin: 30,
     contentMarginSmall: 20,
-    miniNavWidth: 80,
+    miniNavWidth: 60,
     miniNavItemSize: 56,
 }
 
@@ -79,6 +79,23 @@ const lightTheme: DefaultTheme = {
             text: {
                 fontSize: 12,
             },
+            ticks: {
+                line: {
+                    strokeWidth: 1,
+                    stroke: '#637079',
+                },
+                text: {
+                    fill: '#6a7c89',
+                    fontSize: 10,
+                },
+            },
+            title: {
+                text: {
+                    fill: '#6f6f6f',
+                    fontSize: 10,
+                    fontWeight: 800,
+                },
+            },
         },
         tooltip: {
             container: {
@@ -94,23 +111,29 @@ const lightTheme: DefaultTheme = {
         annotations: {
             text: {
                 fill: '#333333',
-                outlineWidth: 3,
+                outlineWidth: 1.5,
                 outlineColor: '#ffffff',
+                outlineOpacity: 0.35,
             },
             link: {
-                stroke: '#333333',
-                outlineWidth: 2,
+                stroke: '#6c6363',
+                strokeWidth: 1.5,
+                outlineWidth: 2.5,
                 outlineColor: '#ffffff',
+                outlineOpacity: 0.35,
             },
             outline: {
-                stroke: '#333333',
-                outlineWidth: 2,
+                stroke: '#6c6363',
+                strokeWidth: 1.5,
+                outlineWidth: 2.5,
                 outlineColor: '#ffffff',
+                outlineOpacity: 0.35,
             },
             symbol: {
-                fill: '#333333',
-                outlineWidth: 2,
+                fill: '#6c6363',
+                outlineWidth: 2.5,
                 outlineColor: '#ffffff',
+                outlineOpacity: 0.35,
             },
         },
     },
@@ -192,6 +215,23 @@ const darkTheme: DefaultTheme = {
                 fontSize: 12,
                 fill: '#8d9cab',
             },
+            ticks: {
+                line: {
+                    strokeWidth: 1,
+                    stroke: '#c8d4e0',
+                },
+                text: {
+                    fill: '#8d9cab',
+                    fontSize: 10,
+                },
+            },
+            title: {
+                text: {
+                    fill: '#ccd7e2',
+                    fontSize: 10,
+                    fontWeight: 800,
+                },
+            },
         },
         tooltip: {
             container: {
@@ -216,23 +256,29 @@ const darkTheme: DefaultTheme = {
         annotations: {
             text: {
                 fill: '#dddddd',
-                outlineWidth: 3,
+                outlineWidth: 1.5,
                 outlineColor: '#0e1317',
+                outlineOpacity: 0.35,
             },
             link: {
-                stroke: '#ffffff',
-                outlineWidth: 2,
+                stroke: '#b2bfcb',
+                strokeWidth: 1.5,
+                outlineWidth: 2.5,
                 outlineColor: '#0e1317',
+                outlineOpacity: 0.35,
             },
             outline: {
-                stroke: '#ffffff',
-                outlineWidth: 2,
+                stroke: '#b2bfcb',
+                strokeWidth: 1.5,
+                outlineWidth: 2.5,
                 outlineColor: '#0e1317',
+                outlineOpacity: 0.35,
             },
             symbol: {
-                fill: '#ffffff',
+                fill: '#b2bfcb',
                 outlineWidth: 2,
                 outlineColor: '#0e1317',
+                outlineOpacity: 0.35,
             },
         },
     },

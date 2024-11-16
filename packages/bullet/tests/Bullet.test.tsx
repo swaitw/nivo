@@ -1,5 +1,5 @@
 import { mount } from 'enzyme'
-import { AxisTickProps } from '@nivo/axes'
+import { AxisTickProps, Axis, AxisTick } from '@nivo/axes'
 import { Bullet, BulletItemProps, BulletRectsItemProps } from '../src'
 
 const sampleData = [
@@ -41,12 +41,12 @@ describe('Bullet', () => {
             expect(items.at(0).prop<BulletItemProps['scale']>('scale').domain()).toEqual([0, 40])
             expect(
                 wrapper
-                    .find('Memo(Axis)')
+                    .find(Axis)
                     .at(0)
-                    .find('Memo(AxisTick)')
+                    .find(AxisTick)
                     .map(tick => tick.text())
             ).toMatchInlineSnapshot(`
-                Array [
+                [
                   "0",
                   "5",
                   "10",
@@ -66,12 +66,12 @@ describe('Bullet', () => {
             expect(items.at(1).prop<BulletItemProps['scale']>('scale').domain()).toEqual([0, 100])
             expect(
                 wrapper
-                    .find('Memo(Axis)')
+                    .find(Axis)
                     .at(1)
-                    .find('Memo(AxisTick)')
+                    .find(AxisTick)
                     .map(tick => tick.text())
             ).toMatchInlineSnapshot(`
-                Array [
+                [
                   "0",
                   "10",
                   "20",
@@ -93,12 +93,12 @@ describe('Bullet', () => {
             expect(items.at(2).prop<BulletItemProps['scale']>('scale').domain()).toEqual([0, 50])
             expect(
                 wrapper
-                    .find('Memo(Axis)')
+                    .find(Axis)
                     .at(2)
-                    .find('Memo(AxisTick)')
+                    .find(AxisTick)
                     .map(tick => tick.text())
             ).toMatchInlineSnapshot(`
-                Array [
+                [
                   "0",
                   "5",
                   "10",
@@ -131,12 +131,12 @@ describe('Bullet', () => {
 
             expect(
                 wrapper
-                    .find('Memo(Axis)')
+                    .find(Axis)
                     .first()
-                    .find('Memo(AxisTick)')
+                    .find(AxisTick)
                     .map(tick => tick.text())
             ).toMatchInlineSnapshot(`
-                Array [
+                [
                   "10",
                   "20",
                   "30",
@@ -158,7 +158,7 @@ describe('Bullet', () => {
         it('should use horizontal layout by default', () => {
             const wrapper = mount(<Bullet width={300} height={300} data={sampleData} />)
             const items = wrapper.find('BulletItem')
-            const ticks = wrapper.find('Memo(Axis)').first().find('Memo(AxisTick)')
+            const ticks = wrapper.find(Axis).first().find(AxisTick)
 
             expect(
                 ticks
@@ -189,7 +189,7 @@ describe('Bullet', () => {
         it('should support reverse layout', () => {
             const wrapper = mount(<Bullet width={300} height={300} data={sampleData} reverse />)
             const items = wrapper.find('BulletItem')
-            const ticks = wrapper.find('Memo(Axis)').first().find('Memo(AxisTick)')
+            const ticks = wrapper.find(Axis).first().find(AxisTick)
             expect(
                 ticks
                     .map(el =>
@@ -384,11 +384,11 @@ describe('Bullet', () => {
             const { animatedProps: _animatedProps, ...props } = customRange.at(0).props()
 
             expect(props).toMatchInlineSnapshot(`
-                Object {
+                {
                   "borderColor": "rgb(65, 125, 224)",
                   "borderWidth": 0,
                   "color": "rgba(65, 125, 224, 1)",
-                  "data": Object {
+                  "data": {
                     "color": "rgb(65, 125, 224)",
                     "index": 0,
                     "v0": 0,
@@ -423,11 +423,11 @@ describe('Bullet', () => {
             const { animatedProps: _animatedProps, ...props } = customMeasure.at(0).props()
 
             expect(props).toMatchInlineSnapshot(`
-                Object {
+                {
                   "borderColor": "rgb(173, 10, 129)",
                   "borderWidth": 0,
                   "color": "rgba(173, 10, 129, 1)",
-                  "data": Object {
+                  "data": {
                     "color": "rgb(173, 10, 129)",
                     "index": 0,
                     "v0": 0,
@@ -457,9 +457,9 @@ describe('Bullet', () => {
             const { animatedProps: _animatedProps, ...props } = customMarker.at(0).props()
 
             expect(props).toMatchInlineSnapshot(`
-                Object {
+                {
                   "color": "rgb(243, 105, 163)",
-                  "data": Object {
+                  "data": {
                     "color": "rgb(243, 105, 163)",
                     "index": 0,
                     "value": 20,

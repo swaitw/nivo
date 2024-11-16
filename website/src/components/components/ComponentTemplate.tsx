@@ -1,20 +1,27 @@
 import React, { useState, useCallback, useMemo } from 'react'
+import { IGatsbyImageData } from 'gatsby-plugin-image'
+import { useTheme } from 'styled-components'
 import { Theme as NivoTheme } from '@nivo/core'
+import { startCase } from 'lodash'
 import { Seo } from '../Seo'
 import Layout from '../Layout'
-import { useTheme } from '../../theming/context'
-import generateCode from '../../lib/generateChartCode'
+import { generateChartCode } from '../../lib/generateChartCode'
 import { ComponentPage } from './ComponentPage'
 import { ComponentHeader } from './ComponentHeader'
-import ComponentFlavorSelector from './ComponentFlavorSelector'
+import { ComponentFlavorSelector } from './ComponentFlavorSelector'
 import { ComponentDescription } from './ComponentDescription'
 import { ComponentTabs } from './ComponentTabs'
-import { ActionsLogger, useActionsLogger } from './ActionsLogger'
-import ComponentSettings from './ComponentSettings'
+import { ActionsLogger, useActionsLogger, ActionLoggerLogFn } from './ActionsLogger'
+import { ComponentSettings } from './ComponentSettings'
 import { Stories } from './Stories'
 import { ChartMeta, ChartProperty, Flavor } from '../../types'
 
-interface ComponentTemplateProps<UnmappedProps extends object, Props extends object, Data> {
+interface ComponentTemplateProps<
+    UnmappedProps extends object,
+    MappedProps extends object,
+    Data,
+    ComponentProps extends object
+> {
     name: string
     meta: ChartMeta
     icon: string
@@ -30,21 +37,28 @@ interface ComponentTemplateProps<UnmappedProps extends object, Props extends obj
     // initial props of the demo, unmapped
     initialProperties: UnmappedProps
     // default props as defined in the package component
-    defaultProperties?: Partial<Props>
-    propertiesMapper?: (unmappedProps: UnmappedProps) => Props
-    codePropertiesMapper?: Function
-    hasData?: boolean
-    generateData?: (previousData?: Data | null) => Data | undefined
+    defaultProperties?: Partial<ComponentProps>
+    propertiesMapper?: (props: UnmappedProps, data: Data) => MappedProps
+    codePropertiesMapper?: (props: MappedProps, data: Data) => MappedProps
+    generateData: (previousData?: Data | null) => Data
+    enableDiceRoll?: boolean
     dataKey?: string
     getDataSize?: (data: Data) => number
     getTabData?: (data: Data) => Data
-    children: (properties: Props, data: Data, theme: NivoTheme, logAction: any) => JSX.Element
+    children: (
+        properties: MappedProps,
+        data: Data,
+        theme: NivoTheme,
+        logAction: ActionLoggerLogFn
+    ) => JSX.Element
+    image?: IGatsbyImageData
 }
 
 export const ComponentTemplate = <
     UnmappedProps extends object = any,
-    Props extends object = any,
-    Data = any
+    MappedProps extends object = any,
+    Data = any,
+    ComponentProps extends object = any
 >({
     name,
     meta,
@@ -56,28 +70,31 @@ export const ComponentTemplate = <
     defaultProperties = {},
     propertiesMapper,
     codePropertiesMapper,
-    hasData = true,
-    generateData = () => undefined,
-    dataKey,
+    generateData,
+    enableDiceRoll = true,
+    dataKey = 'data',
     getDataSize,
     getTabData = data => data,
+    image,
     children,
-}: ComponentTemplateProps<UnmappedProps, Props, Data>) => {
+}: ComponentTemplateProps<UnmappedProps, MappedProps, Data, ComponentProps>) => {
     const theme = useTheme()
 
-    const [settings, setSettings] = useState(initialProperties)
+    const [settings, setSettings] = useState<UnmappedProps>(initialProperties)
 
-    const initialData = useMemo(() => (hasData ? generateData() : null), [])
-    const [data, setData] = useState(initialData)
+    const [data, setData] = useState<Data>(() => generateData())
+
     const diceRoll = useCallback(() => {
         setData(currentData => generateData(currentData))
-    }, [setData])
+    }, [setData, generateData])
 
     const [actions, logAction] = useActionsLogger()
 
-    let mappedProperties = settings
+    let mappedProperties: MappedProps
     if (propertiesMapper !== undefined) {
         mappedProperties = propertiesMapper(settings, data)
+    } else {
+        mappedProperties = settings as unknown as MappedProps
     }
 
     let codeProperties = mappedProperties
@@ -85,40 +102,43 @@ export const ComponentTemplate = <
         codeProperties = codePropertiesMapper(mappedProperties, data)
     }
 
-    const code = generateCode(`Responsive${name}`, codeProperties, {
+    const code = generateChartCode(`Responsive${name}`, codeProperties, {
         pkg: meta.package,
         defaults: defaultProperties,
-        dataKey: hasData ? dataKey : null,
+        dataKey: data !== undefined ? dataKey : undefined,
     })
 
     const hasStories = meta.stories !== undefined && meta.stories.length > 0
 
+    const title = `${startCase(name)} chart`
+    const description = `${meta.package} package ${startCase(name)} chart.`
     const tags = useMemo(() => [meta.package, ...meta.tags], [meta])
 
     const flavorKeys = useMemo(() => flavors.map(flavor => flavor.flavor), [flavors])
 
+    const tabData = useMemo(() => getTabData(data), [data])
+
     return (
         <Layout>
             <ComponentPage>
-                <Seo title={name} keywords={tags} />
+                <Seo title={title} description={description} image={image} keywords={tags} />
                 <ComponentHeader chartClass={name} tags={tags} />
                 <ComponentFlavorSelector flavors={flavors} current={currentFlavor} />
                 <ComponentDescription description={meta.description} />
                 <ComponentTabs<Data>
                     chartClass={icon}
                     code={code}
-                    data={hasData ? getTabData(data!) : undefined}
+                    data={tabData}
                     dataKey={dataKey}
-                    nodeCount={
-                        hasData && getDataSize !== undefined ? getDataSize(data!) : undefined
+                    nodeCount={getDataSize !== undefined ? getDataSize(data) : undefined}
+                    diceRoll={
+                        enableDiceRoll ? (data !== undefined ? diceRoll : undefined) : undefined
                     }
-                    diceRoll={hasData ? diceRoll : undefined}
                 >
                     {children(mappedProperties, data, theme.nivo, logAction)}
                 </ComponentTabs>
                 <ActionsLogger actions={actions} isFullWidth={!hasStories} />
                 <ComponentSettings
-                    component={name}
                     settings={settings}
                     onChange={setSettings}
                     groups={properties}

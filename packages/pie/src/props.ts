@@ -10,7 +10,7 @@ export const defaultProps = {
     padAngle: 0,
     cornerRadius: 0,
 
-    layers: ['arcLinkLabels', 'arcs', 'arcLabels', 'legends'],
+    layers: ['arcs', 'arcLinkLabels', 'arcLabels', 'legends'],
 
     // layout
     startAngle: 0,
@@ -45,7 +45,7 @@ export const defaultProps = {
     arcLinkLabelsTextColor: { theme: 'labels.text.fill' },
     arcLinkLabelsColor: { theme: 'axis.ticks.line.stroke' },
 
-    colors: ({ scheme: 'nivo' } as unknown) as OrdinalColorScaleConfig,
+    colors: { scheme: 'nivo' } as unknown as OrdinalColorScaleConfig,
     defs: [],
     fill: [],
 

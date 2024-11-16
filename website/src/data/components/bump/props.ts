@@ -1,92 +1,56 @@
-import { BumpDefaultProps as defaults } from '@nivo/bump'
+import { bumpSvgDefaultProps as defaults } from '@nivo/bump'
+import { themeProperty, motionProperties, groupProperties } from '../../../lib/componentProperties'
 import {
-    themeProperty,
-    motionProperties,
-    axesProperties,
-    groupProperties,
-} from '../../../lib/componentProperties'
-import { ChartProperty } from '../../../types'
+    chartDimensions,
+    ordinalColors,
+    chartGrid,
+    axes,
+    isInteractive,
+} from '../../../lib/chart-properties'
+import { ChartProperty, Flavor } from '../../../types'
+
+const allFlavors: Flavor[] = ['svg']
 
 const props: ChartProperty[] = [
     {
         key: 'data',
         group: 'Base',
+        type: 'BumpSerie<Datum, ExtraProps>[]',
         help: 'Chart data.',
+        flavors: allFlavors,
         description: `
             Chart data, which must conform to this structure:
+
             \`\`\`
-            Array<{
+            {
                 id:   string
-                data: Array<{
+                data: {
                     x: number | string
-                    y: number | string
-                }>
-            }>
+                    y: number | null
+                }[]
+            }[]
             \`\`\`
+
             This component assumes that every serie contains all
             x values sorted the same way they should appear on the chart.
+            
+            As this component is a TypeScript generic, it is possible to customize
+            the datum using the \`Datum\` arg, and it's also possible to add
+            some extra properties to the series by passing \`ExtraProps\`.
         `,
         required: true,
-        type: 'object[]',
     },
-    {
-        key: 'width',
-        group: 'Base',
-        enableControlForFlavors: ['api'],
-        help: 'Chart width.',
-        description: `
-            not required if using
-            \`<ResponsiveChord/>\`.
-            Also note that width does not include labels,
-            so you should add enough margin to display them.
-        `,
-        type: 'number',
-        required: true,
-        controlType: 'range',
-        controlOptions: {
-            unit: 'px',
-            min: 100,
-            max: 1000,
-            step: 5,
-        },
-    },
-    {
-        key: 'height',
-        group: 'Base',
-        enableControlForFlavors: ['api'],
-        help: 'Chart height.',
-        description: `
-            not required if using
-            \`<ResponsiveChord/>\`.
-            Also note that width does not include labels,
-            so you should add enough margin to display them.
-        `,
-        type: 'number',
-        required: true,
-        controlType: 'range',
-        controlOptions: {
-            unit: 'px',
-            min: 100,
-            max: 1000,
-            step: 5,
-        },
-    },
-    {
-        key: 'margin',
-        group: 'Base',
-        help: 'Chart margin.',
-        type: 'object',
-        controlType: 'margin',
-    },
+    ...chartDimensions(allFlavors),
     {
         key: 'interpolation',
         group: 'Base',
         type: 'string',
         help: `Line interpolation.`,
         required: false,
+        flavors: ['svg'],
         defaultValue: defaults.interpolation,
-        controlType: 'radio',
-        controlOptions: {
+        control: {
+            type: 'radio',
             choices: [
                 { label: 'smooth', value: 'smooth' },
                 { label: 'linear', value: 'linear' },
@@ -99,8 +63,10 @@ const props: ChartProperty[] = [
         type: 'number',
         help: 'X padding.',
         defaultValue: defaults.xPadding,
-        controlType: 'range',
-        controlOptions: {
+        flavors: ['svg'],
+        required: false,
+        control: {
+            type: 'range',
             min: 0,
             max: 1,
             step: 0.05,
@@ -112,8 +78,10 @@ const props: ChartProperty[] = [
         type: 'number',
         help: 'X outer padding.',
         defaultValue: defaults.xOuterPadding,
-        controlType: 'range',
-        controlOptions: {
+        flavors: ['svg'],
+        required: false,
+        control: {
+            type: 'range',
             min: 0,
             max: 1,
             step: 0.05,
@@ -125,38 +93,39 @@ const props: ChartProperty[] = [
         type: 'number',
         help: 'Y outer padding.',
         defaultValue: defaults.yOuterPadding,
-        controlType: 'range',
-        controlOptions: {
+        flavors: ['svg'],
+        required: false,
+        control: {
+            type: 'range',
             min: 0,
             max: 1,
             step: 0.05,
         },
     },
     themeProperty(['svg']),
-    {
-        key: 'colors',
-        help: 'Defines color range.',
-        type: 'string | Function | string[]',
-        required: false,
+    ordinalColors({
+        flavors: allFlavors,
         defaultValue: defaults.colors,
-        controlType: 'ordinalColors',
-        group: 'Style',
-    },
+    }),
     {
         key: 'lineWidth',
         group: 'Style',
         type: 'number | (serie: Serie) => number',
         help: 'Line width.',
+        flavors: ['svg'],
+        required: false,
         defaultValue: defaults.lineWidth,
-        controlType: 'lineWidth',
+        control: { type: 'lineWidth' },
     },
     {
         key: 'activeLineWidth',
         group: 'Style',
         type: 'number | (serie: Serie) => number',
         help: 'Line width for active series.',
+        flavors: ['svg'],
+        required: false,
         defaultValue: defaults.activeLineWidth,
-        controlType: 'lineWidth',
+        control: { type: 'lineWidth' },
     },
     {
         key: 'inactiveLineWidth',
@@ -164,7 +133,9 @@ const props: ChartProperty[] = [
         type: 'number | (serie: Serie) => number',
         help: 'Line width for inactive series.',
         defaultValue: defaults.inactiveLineWidth,
-        controlType: 'lineWidth',
+        flavors: ['svg'],
+        required: false,
+        control: { type: 'lineWidth' },
     },
     {
         key: 'opacity',
@@ -172,7 +143,9 @@ const props: ChartProperty[] = [
         type: 'number | (serie: Serie) => number',
         help: 'Opacity.',
         defaultValue: defaults.opacity,
-        controlType: 'opacity',
+        flavors: ['svg'],
+        required: false,
+        control: { type: 'opacity' },
     },
     {
         key: 'activeOpacity',
@@ -180,7 +153,9 @@ const props: ChartProperty[] = [
         type: 'number | (serie: Serie) => number',
         help: 'Opacity for active series.',
         defaultValue: defaults.activeOpacity,
-        controlType: 'opacity',
+        flavors: ['svg'],
+        required: false,
+        control: { type: 'opacity' },
     },
     {
         key: 'inactiveOpacity',
@@ -188,47 +163,64 @@ const props: ChartProperty[] = [
         type: 'number | (serie: Serie) => number',
         help: 'Opacity for inactive series.',
         defaultValue: defaults.inactiveOpacity,
-        controlType: 'opacity',
+        flavors: ['svg'],
+        required: false,
+        control: { type: 'opacity' },
     },
     {
         key: 'startLabel',
+        help: 'Start label, use a boolean to enable/disable, or a function to customize its text.',
         group: 'Labels',
-        type: 'false | string | (serie: Serie) => string',
+        type: 'boolean | (serie: BumpSerie) => string',
         defaultValue: defaults.startLabel,
+        flavors: ['svg'],
+        required: false,
+        control: { type: 'switch' },
     },
     {
         key: 'startLabelPadding',
+        help: 'Start label padding.',
         group: 'Labels',
         type: 'number',
         defaultValue: defaults.startLabelPadding,
-        controlType: 'range',
-        controlOptions: {
+        flavors: ['svg'],
+        required: false,
+        control: {
+            type: 'range',
             min: 0,
             max: 30,
         },
     },
     {
         key: 'startLabelTextColor',
-        help: 'Method to compute start label text color.',
-        type: 'string | object | Function',
+        help: 'Method to compute start label text color, or a function to customize its text.',
+        type: 'InheritedColorConfig<BumpComputedSerie>',
         required: false,
+        flavors: ['svg'],
         defaultValue: defaults.startLabelTextColor,
-        controlType: 'inheritedColor',
+        control: { type: 'inheritedColor' },
         group: 'Labels',
     },
     {
         key: 'endLabel',
+        help: 'End label, use a boolean to enable/disable, or a function to customize its text.',
         group: 'Labels',
-        type: 'false | string | (serie: Serie) => string',
+        type: 'boolean | (serie: BumpSerie) => string',
         defaultValue: defaults.endLabel,
+        flavors: ['svg'],
+        required: false,
+        control: { type: 'switch' },
     },
     {
         key: 'endLabelPadding',
+        help: 'End label padding.',
         group: 'Labels',
         type: 'number',
         defaultValue: defaults.endLabelPadding,
-        controlType: 'range',
-        controlOptions: {
+        flavors: ['svg'],
+        required: false,
+        control: {
+            type: 'range',
             min: 0,
             max: 30,
         },
@@ -236,10 +228,11 @@ const props: ChartProperty[] = [
     {
         key: 'endLabelTextColor',
         help: 'Method to compute end label text color.',
-        type: 'string | object | Function',
+        type: 'InheritedColorConfig<BumpComputedSerie>',
         required: false,
         defaultValue: defaults.endLabelTextColor,
-        controlType: 'inheritedColor',
+        flavors: ['svg'],
+        control: { type: 'inheritedColor' },
         group: 'Labels',
     },
     {
@@ -248,8 +241,10 @@ const props: ChartProperty[] = [
         help: 'Point size.',
         type: 'number | Function',
         defaultValue: defaults.pointSize,
-        controlType: 'range',
-        controlOptions: {
+        flavors: ['svg'],
+        required: false,
+        control: {
+            type: 'range',
             min: 0,
             max: 24,
         },
@@ -260,8 +255,10 @@ const props: ChartProperty[] = [
         help: 'Point size for active series.',
         type: 'number | Function',
         defaultValue: defaults.activePointSize,
-        controlType: 'range',
-        controlOptions: {
+        flavors: ['svg'],
+        required: false,
+        control: {
+            type: 'range',
             min: 0,
             max: 24,
         },
@@ -272,8 +269,10 @@ const props: ChartProperty[] = [
         help: 'Point size for inactive series.',
         type: 'number | Function',
         defaultValue: defaults.inactivePointSize,
-        controlType: 'range',
-        controlOptions: {
+        flavors: ['svg'],
+        required: false,
+        control: {
+            type: 'range',
             min: 0,
             max: 24,
         },
@@ -284,9 +283,12 @@ const props: ChartProperty[] = [
         type: 'string | object | Function',
         help: 'Method to compute point fill color.',
         defaultValue: defaults.pointColor,
-        controlType: 'inheritedColor',
-        controlOptions: {
+        flavors: ['svg'],
+        required: false,
+        control: {
+            type: 'inheritedColor',
             inheritableProperties: ['serie.color'],
+            defaultFrom: 'serie.color',
         },
     },
     {
@@ -295,7 +297,9 @@ const props: ChartProperty[] = [
         help: 'Point border width.',
         type: 'number | Function',
         defaultValue: defaults.pointBorderWidth,
-        controlType: 'lineWidth',
+        flavors: ['svg'],
+        required: false,
+        control: { type: 'lineWidth' },
     },
     {
         key: 'activePointBorderWidth',
@@ -303,7 +307,9 @@ const props: ChartProperty[] = [
         help: 'Point border width for active series.',
         type: 'number | Function',
         defaultValue: defaults.activePointBorderWidth,
-        controlType: 'lineWidth',
+        flavors: ['svg'],
+        required: false,
+        control: { type: 'lineWidth' },
     },
     {
         key: 'inactivePointBorderWidth',
@@ -311,7 +317,9 @@ const props: ChartProperty[] = [
         help: 'Point border width for inactive series.',
         type: 'number | Function',
         defaultValue: defaults.inactivePointBorderWidth,
-        controlType: 'lineWidth',
+        flavors: ['svg'],
+        required: false,
+        control: { type: 'lineWidth' },
     },
     {
         key: 'pointBorderColor',
@@ -319,80 +327,108 @@ const props: ChartProperty[] = [
         type: 'string | object | Function',
         help: 'Method to compute point border color.',
         defaultValue: defaults.pointBorderColor,
-        controlType: 'inheritedColor',
-        controlOptions: {
+        flavors: ['svg'],
+        required: false,
+        control: {
+            type: 'inheritedColor',
             inheritableProperties: ['color', 'serie.color'],
+            defaultFrom: 'color',
         },
     },
-    {
-        key: 'enableGridX',
-        group: 'Grid & Axes',
-        help: 'Enable/disable x grid.',
-        type: 'boolean',
-        required: false,
-        defaultValue: defaults.enableGridX,
-        controlType: 'switch',
-    },
-    {
-        key: 'enableGridY',
-        group: 'Grid & Axes',
-        help: 'Enable/disable y grid.',
-        type: 'boolean',
-        required: false,
-        defaultValue: defaults.enableGridY,
-        controlType: 'switch',
-    },
-    ...axesProperties(),
-    {
-        key: 'isInteractive',
-        group: 'Interactivity',
-        type: 'boolean',
-        help: 'Enable/disable interactivity.',
-        required: false,
+    ...chartGrid({
+        flavors: allFlavors,
+        xDefault: defaults.enableGridX,
+        yDefault: defaults.enableGridY,
+    }),
+    ...axes({ flavors: allFlavors }),
+    isInteractive({
+        flavors: ['svg'],
         defaultValue: defaults.isInteractive,
-        controlType: 'switch',
+    }),
+    {
+        key: 'useMesh',
+        flavors: ['svg'],
+        help: 'Use a voronoi mesh to detect mouse interactions.',
+        description: `
+            Use a voronoi mesh to detect mouse interactions, using points rather than lines
+            to detect interactions.
+
+            In this mode, lines are still highlighted when hovering a point, but only
+            the current point is being highlighted.
+        `,
+        type: 'boolean',
+        required: false,
+        defaultValue: defaults.useMesh,
+        control: { type: 'switch' },
+        group: 'Interactivity',
+    },
+    {
+        key: 'debugMesh',
+        flavors: ['svg', 'canvas'],
+        help: 'Display mesh used to detect mouse interactions (voronoi cells).',
+        type: 'boolean',
+        required: false,
+        defaultValue: defaults.debugMesh,
+        control: { type: 'switch' },
+        group: 'Interactivity',
     },
     {
         key: 'onMouseEnter',
         group: 'Interactivity',
-        type: '(serie, event) => void',
-        help: 'onMouseEnter handler.',
+        type: '(data: (BumpComputedSerie | BumpPoint), event: MouseEvent) => void',
+        help: 'onMouseEnter handler, for series by default, for points if `useMesh` is `true`.',
         required: false,
+        flavors: ['svg'],
     },
     {
         key: 'onMouseMove',
         group: 'Interactivity',
-        type: '(serie, event) => void',
-        help: 'onMouseMove handler.',
+        type: '(data: (BumpComputedSerie | BumpPoint), event: MouseEvent) => void',
+        help: 'onMouseMove handler, for series by default, for points if `useMesh` is `true`.',
         required: false,
+        flavors: ['svg'],
     },
     {
         key: 'onMouseLeave',
         group: 'Interactivity',
-        type: '(serie, event) => void',
-        help: 'onMouseLeave handler.',
+        type: '(data: (BumpComputedSerie | BumpPoint), event: MouseEvent) => void',
+        help: 'onMouseLeave handler, for series by default, for points if `useMesh` is `true`.',
         required: false,
+        flavors: ['svg'],
     },
     {
         key: 'onClick',
         group: 'Interactivity',
-        type: '(serie, event) => void',
-        help: 'onClick handler.',
+        type: '(serie: BumpComputedSerie, event: MouseEvent) => void',
+        help: 'onClick handler, for series by default, for points if `useMesh` is `true`.',
         required: false,
+        flavors: ['svg'],
     },
     {
-        key: 'tooltip',
+        key: 'lineTooltip',
         group: 'Interactivity',
         type: 'Function',
         required: false,
-        help: 'Custom tooltip component.',
+        help: 'Custom line tooltip component, used when `useMesh` is `false`.',
         description: `
-            A function allowing complete tooltip customisation,
-            it must return a valid HTML
-            element and will receive the series's data.
+            A function allowing complete tooltip customisation for lines,
+            it must return a valid HTML element and will receive the series's data.
         `,
+        flavors: ['svg'],
     },
-    ...motionProperties(['svg'], defaults, 'react-spring'),
+    {
+        key: 'pointTooltip',
+        group: 'Interactivity',
+        type: 'Function',
+        required: false,
+        help: 'Custom point tooltip component, used when `useMesh` is `true`.',
+        description: `
+            A function allowing complete tooltip customisation for points,
+            it must return a valid HTML element and will receive the point's data.
+        `,
+        flavors: ['svg'],
+    },
+    ...motionProperties(['svg'], defaults),
 ]
 
 export const groups = groupProperties(props)

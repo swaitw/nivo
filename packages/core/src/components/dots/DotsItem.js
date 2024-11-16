@@ -1,7 +1,7 @@
 import { createElement, memo } from 'react'
 import PropTypes from 'prop-types'
 import { useSpring, animated } from '@react-spring/web'
-import { useTheme } from '../../theming'
+import { useTheme, sanitizeSvgTextStyle } from '../../theming'
 import { useMotionConfig } from '../../motion'
 import DotsItemSymbol from './DotsItemSymbol'
 
@@ -37,7 +37,11 @@ const DotsItem = ({
                 borderColor,
             })}
             {label && (
-                <text textAnchor={labelTextAnchor} y={labelYOffset} style={theme.dots.text}>
+                <text
+                    textAnchor={labelTextAnchor}
+                    y={labelYOffset}
+                    style={sanitizeSvgTextStyle(theme.dots.text)}
+                >
                     {label}
                 </text>
             )}
@@ -59,7 +63,7 @@ DotsItem.propTypes = {
 
     label: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     labelTextAnchor: PropTypes.oneOf(['start', 'middle', 'end']),
-    labelYOffset: PropTypes.number.isRequired,
+    labelYOffset: PropTypes.number,
 }
 
 export default memo(DotsItem)

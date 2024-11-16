@@ -1,9 +1,9 @@
 import * as React from 'react'
 import { Interpolation, SpringValue } from '@react-spring/web'
 import { ForceX, ForceY, ForceCollide } from 'd3-force'
-import { PropertyAccessor, ValueFormat, Theme, ModernMotionProps, Box, Margin } from '@nivo/core'
+import { PropertyAccessor, ValueFormat, Theme, MotionProps, Box, Margin } from '@nivo/core'
 import { InheritedColorConfig, OrdinalColorScaleConfig } from '@nivo/colors'
-import { AxisProps, CanvasAxisProp } from '@nivo/axes'
+import { AxisProps, CanvasAxisProps } from '@nivo/axes'
 import { ScaleLinear, ScaleLinearSpec, ScaleTime, ScaleTimeSpec, TicksSpec } from '@nivo/scales'
 import { AnnotationMatcher } from '@nivo/annotations'
 import { ScaleOrdinal } from 'd3-scale'
@@ -127,7 +127,7 @@ export type SwarmPlotCommonProps<RawDatum> = {
         ScaleLinear<number> | ScaleTime<string | Date> | ScaleOrdinal<string, number>
     >[]
     animate: boolean
-    motionConfig: ModernMotionProps['motionConfig']
+    motionConfig: MotionProps['motionConfig']
     role: string
     renderWrapper?: boolean
 }
@@ -143,10 +143,10 @@ export type SwarmPlotSvgProps<RawDatum> = SwarmPlotCommonProps<RawDatum> &
 
 export type SwarmPlotCanvasProps<RawDatum> = SwarmPlotCommonProps<RawDatum> &
     Pick<MouseHandlers<RawDatum>, 'onMouseMove' | 'onClick'> & {
-        axisTop?: CanvasAxisProp<string> | null
-        axisRight?: CanvasAxisProp<string> | null
-        axisBottom?: CanvasAxisProp<string> | null
-        axisLeft?: CanvasAxisProp<string> | null
+        axisTop?: CanvasAxisProps<string> | null
+        axisRight?: CanvasAxisProps<string> | null
+        axisBottom?: CanvasAxisProps<string> | null
+        axisLeft?: CanvasAxisProps<string> | null
         pixelRatio: number
         renderCircle: (
             ctx: CanvasRenderingContext2D,

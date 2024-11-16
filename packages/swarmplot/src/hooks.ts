@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, MouseEvent } from 'react'
 import { ScaleOrdinal } from 'd3-scale'
 import { usePropertyAccessor, useValueFormatter } from '@nivo/core'
 import { useOrdinalColorScale } from '@nivo/colors'
@@ -61,13 +61,10 @@ export const useOrdinalScale = ({
     groups: string[]
     gap: number
 }) =>
-    useMemo(() => computeOrdinalScale({ width, height, axis, groups, gap }), [
-        width,
-        height,
-        axis,
-        groups,
-        gap,
-    ])
+    useMemo(
+        () => computeOrdinalScale({ width, height, axis, groups, gap }),
+        [width, height, axis, groups, gap]
+    )
 
 const useSize = <RawDatum>(size: SizeSpec<RawDatum>) =>
     useMemo(() => getSizeGenerator<RawDatum>(size), [size])
@@ -239,7 +236,7 @@ export const useNodeMouseHandlers = <RawDatum>({
     const { showTooltipFromEvent, hideTooltip } = useTooltip()
 
     const mouseEnterHandler = useCallback(
-        (node, event) => {
+        (node: ComputedDatum<RawDatum>, event: MouseEvent) => {
             if (!isInteractive) return
 
             showTooltipFromEvent(tooltip(node), event)
@@ -249,7 +246,7 @@ export const useNodeMouseHandlers = <RawDatum>({
     )
 
     const mouseMoveHandler = useCallback(
-        (node, event) => {
+        (node: ComputedDatum<RawDatum>, event: MouseEvent) => {
             if (!isInteractive) return
 
             showTooltipFromEvent(tooltip(node), event)
@@ -259,7 +256,7 @@ export const useNodeMouseHandlers = <RawDatum>({
     )
 
     const mouseLeaveHandler = useCallback(
-        (node, event) => {
+        (node: ComputedDatum<RawDatum>, event: MouseEvent) => {
             if (!isInteractive) return
 
             hideTooltip()
@@ -269,7 +266,7 @@ export const useNodeMouseHandlers = <RawDatum>({
     )
 
     const clickHandler = useCallback(
-        (node, event) => {
+        (node: ComputedDatum<RawDatum>, event: MouseEvent) => {
             if (!isInteractive) return
 
             onClick?.(node, event)

@@ -1,19 +1,31 @@
+// @ts-ignore
 import { lineCurvePropKeys } from '@nivo/core'
+// @ts-ignore
 import { LineDefaultProps as defaults } from '@nivo/line'
 import {
     themeProperty,
-    axesProperties,
     motionProperties,
     getLegendsProps,
     groupProperties,
     defsProperties,
 } from '../../../lib/componentProperties'
-import { ChartProperty } from '../../../types'
+import {
+    chartDimensions,
+    ordinalColors,
+    blendMode,
+    chartGrid,
+    axes,
+    isInteractive,
+} from '../../../lib/chart-properties'
+import { ChartProperty, Flavor } from '../../../types'
+
+const allFlavors: Flavor[] = ['svg', 'canvas', 'api']
 
 const props: ChartProperty[] = [
     {
         key: 'data',
         group: 'Base',
+        flavors: allFlavors,
         help: 'Chart data.',
         description: `
             Chart data, which must conform to this structure:
@@ -33,17 +45,21 @@ const props: ChartProperty[] = [
     {
         key: 'xScale',
         type: 'object',
+        flavors: allFlavors,
         group: 'Base',
         help: `X scale configuration.`,
-        controlType: 'object',
-        controlOptions: {
+        required: false,
+        control: {
+            type: 'object',
             props: [
                 {
                     key: 'type',
                     help: `Scale type.`,
                     type: 'string',
-                    controlType: 'choices',
-                    controlOptions: {
+                    required: true,
+                    flavors: allFlavors,
+                    control: {
+                        type: 'choices',
                         disabled: true,
                         choices: ['linear', 'point'].map(v => ({
                             label: v,
@@ -58,6 +74,7 @@ const props: ChartProperty[] = [
         key: 'xFormat',
         group: 'Base',
         help: 'Optional formatter for x values.',
+        flavors: allFlavors,
         description: `
             The formatted value can then be used for labels & tooltips.
 
@@ -70,22 +87,26 @@ const props: ChartProperty[] = [
         `,
         required: false,
         type: 'Function | string',
-        controlType: 'valueFormat',
+        control: { type: 'valueFormat' },
     },
     {
         key: 'yScale',
         type: 'object',
         help: `Y scale configuration.`,
+        flavors: allFlavors,
         group: 'Base',
-        controlType: 'object',
-        controlOptions: {
+        required: false,
+        control: {
+            type: 'object',
             props: [
                 {
                     key: 'type',
                     help: `Scale type.`,
                     type: 'string',
-                    controlType: 'choices',
-                    controlOptions: {
+                    flavors: allFlavors,
+                    required: true,
+                    control: {
+                        type: 'choices',
                         disabled: true,
                         choices: ['linear', 'point'].map(v => ({
                             label: v,
@@ -96,17 +117,19 @@ const props: ChartProperty[] = [
                 {
                     key: 'stacked',
                     help: 'Enable/disable stacked mode.',
+                    flavors: allFlavors,
                     type: 'boolean',
                     required: false,
-                    controlType: 'switch',
+                    control: { type: 'switch' },
                 },
                 {
                     key: 'min',
                     help: 'Minimum scale value.',
+                    flavors: allFlavors,
                     required: false,
                     type: `number | 'auto'`,
-                    controlType: 'switchableRange',
-                    controlOptions: {
+                    control: {
+                        type: 'switchableRange',
                         disabledValue: 'auto',
                         defaultValue: 0,
                         min: -2000,
@@ -116,10 +139,11 @@ const props: ChartProperty[] = [
                 {
                     key: 'max',
                     help: 'Maximum scale value.',
+                    flavors: allFlavors,
                     required: false,
                     type: `number | 'auto'`,
-                    controlType: 'switchableRange',
-                    controlOptions: {
+                    control: {
+                        type: 'switchableRange',
                         disabledValue: 'auto',
                         defaultValue: 1200,
                         min: -2000,
@@ -132,6 +156,7 @@ const props: ChartProperty[] = [
     {
         key: 'yFormat',
         group: 'Base',
+        flavors: allFlavors,
         help: 'Optional formatter for y values.',
         description: `
             The formatted value can then be used for labels & tooltips.
@@ -145,58 +170,22 @@ const props: ChartProperty[] = [
         `,
         required: false,
         type: 'Function | string',
-        controlType: 'valueFormat',
+        control: { type: 'valueFormat' },
     },
-    {
-        key: 'width',
-        enableControlForFlavors: ['api'],
-        help: 'Chart width, not required when using responsive variant.',
-        type: 'number',
-        required: true,
-        controlType: 'range',
-        group: 'Base',
-        controlOptions: {
-            unit: 'px',
-            min: 100,
-            max: 1000,
-            step: 5,
-        },
-    },
-    {
-        key: 'height',
-        enableControlForFlavors: ['api'],
-        help: 'Chart height, not required when using responsive variant.',
-        type: 'number',
-        required: true,
-        controlType: 'range',
-        group: 'Base',
-        controlOptions: {
-            unit: 'px',
-            min: 100,
-            max: 1000,
-            step: 5,
-        },
-    },
-    {
-        key: 'margin',
-        help: 'Chart margin.',
-        type: 'object',
-        required: false,
-        controlType: 'margin',
-        group: 'Base',
-    },
+    ...chartDimensions(allFlavors),
     {
         key: 'curve',
         help: 'Curve interpolation.',
+        flavors: allFlavors,
         description: `
             Defines the curve factory to use for the line generator.
         `,
         type: 'string',
         required: false,
         defaultValue: defaults.curve,
-        controlType: 'choices',
         group: 'Style',
-        controlOptions: {
+        control: {
+            type: 'choices',
             choices: lineCurvePropKeys.map((key: string) => ({
                 label: key,
                 value: key,
@@ -204,36 +193,34 @@ const props: ChartProperty[] = [
         },
     },
     themeProperty(['svg', 'canvas', 'api']),
-    {
-        key: 'colors',
-        help: 'Defines color range.',
-        type: 'string | Function | string[]',
-        required: false,
+    ordinalColors({
+        flavors: allFlavors,
         defaultValue: defaults.colors,
-        controlType: 'ordinalColors',
-        group: 'Style',
-    },
+    }),
     {
         key: 'lineWidth',
         help: 'Line width.',
+        flavors: allFlavors,
         type: 'number',
         required: false,
         defaultValue: defaults.lineWidth,
-        controlType: 'lineWidth',
+        control: { type: 'lineWidth' },
         group: 'Style',
     },
     {
         key: 'enableArea',
         help: 'Enable/disable area below each line.',
+        flavors: allFlavors,
         type: 'boolean',
         required: false,
         defaultValue: defaults.enableArea,
-        controlType: 'switch',
+        control: { type: 'switch' },
         group: 'Style',
     },
     {
         key: 'areaBaselineValue',
         help: 'Define the value to be used for area baseline.',
+        flavors: allFlavors,
         description: `
             Define the value to be used for area baseline.
             Please note that this value isn't the
@@ -243,9 +230,9 @@ const props: ChartProperty[] = [
         type: 'number | string | Date',
         required: false,
         defaultValue: defaults.areaBaselineValue,
-        controlType: 'range',
         group: 'Style',
-        controlOptions: {
+        control: {
+            type: 'range',
             min: 0,
             max: 200,
             step: 10,
@@ -254,31 +241,25 @@ const props: ChartProperty[] = [
     {
         key: 'areaOpacity',
         help: 'Area opacity (0~1), depends on enableArea.',
+        flavors: allFlavors,
         required: false,
         defaultValue: defaults.areaOpacity,
         type: 'number',
-        controlType: 'opacity',
+        control: { type: 'opacity' },
         group: 'Style',
     },
-    {
+    blendMode({
         key: 'areaBlendMode',
+        target: 'areas',
         flavors: ['svg'],
-        help: 'Defines CSS mix-blend-mode property.',
-        description: `
-            Defines CSS \`mix-blend-mode\` property for areas,
-            see
-            [MDN documentation](https://developer.mozilla.org/fr/docs/Web/CSS/mix-blend-mode).
-        `,
-        type: 'string',
-        required: false,
         defaultValue: defaults.areaBlendMode,
-        controlType: 'blendMode',
-        group: 'Style',
-    },
+    }),
     ...defsProperties('Style', ['svg']),
     {
         key: 'layers',
         group: 'Customization',
+        type: '(string | Component)[]',
+        flavors: allFlavors,
         help: 'Defines the order of layers and add custom layers.',
         description: `
             You can also use this property to insert extra layers
@@ -292,17 +273,17 @@ const props: ChartProperty[] = [
     {
         key: 'enablePoints',
         help: 'Enable/disable points.',
+        flavors: allFlavors,
         type: 'boolean',
         required: false,
         defaultValue: defaults.enablePoints,
-        controlType: 'switch',
+        control: { type: 'switch' },
         group: 'Points',
     },
     {
         key: 'pointSymbol',
         flavors: ['svg'],
-        help:
-            'Overrides default point circle. The function will receive `size`, `color`, `borderWidth` and `borderColor` props and must return a valid SVG element.',
+        help: 'Overrides default point circle. The function will receive `size`, `color`, `borderWidth` and `borderColor` props and must return a valid SVG element.',
         type: 'Function',
         required: false,
         group: 'Points',
@@ -310,12 +291,13 @@ const props: ChartProperty[] = [
     {
         key: 'pointSize',
         help: 'Size of the points.',
+        flavors: allFlavors,
         type: 'number',
         required: false,
         defaultValue: defaults.pointSize,
         group: 'Points',
-        controlType: 'range',
-        controlOptions: {
+        control: {
+            type: 'range',
             unit: 'px',
             min: 2,
             max: 20,
@@ -325,28 +307,31 @@ const props: ChartProperty[] = [
         key: 'pointColor',
         help: 'Method to compute points color.',
         type: 'string | object | Function',
+        flavors: allFlavors,
         required: false,
         defaultValue: defaults.pointColor,
         group: 'Points',
-        controlType: 'inheritedColor',
+        control: { type: 'inheritedColor' },
     },
     {
         key: 'pointBorderWidth',
         help: 'Width of the points border.',
+        flavors: allFlavors,
         type: 'number',
         required: false,
         defaultValue: defaults.pointBorderWidth,
         group: 'Points',
-        controlType: 'lineWidth',
+        control: { type: 'lineWidth' },
     },
     {
         key: 'pointBorderColor',
         help: 'Method to compute points border color.',
+        flavors: allFlavors,
         type: 'string | object | Function',
         required: false,
         defaultValue: defaults.pointBorderColor,
         group: 'Points',
-        controlType: 'inheritedColor',
+        control: { type: 'inheritedColor' },
     },
     {
         key: 'enablePointLabel',
@@ -356,18 +341,17 @@ const props: ChartProperty[] = [
         type: 'boolean',
         required: false,
         defaultValue: defaults.enablePointLabel,
-        controlType: 'switch',
+        control: { type: 'switch' },
     },
     {
         key: 'pointLabel',
         flavors: ['svg', 'api'],
         group: 'Points',
-        help:
-            'Property to use to determine point label. If a function is provided, it will receive current point data and should return the desired label.',
+        help: 'Property to use to determine point label. If a function is provided, it will receive current point data and should return the desired label.',
         type: 'string',
         required: false,
-        controlType: 'choices',
-        controlOptions: {
+        control: {
+            type: 'choices',
             choices: ['y', 'yFormatted', 'x', 'xFormatted', `d => \`\${d.x}: \${d.y}\``].map(
                 choice => ({
                     label: choice,
@@ -384,56 +368,29 @@ const props: ChartProperty[] = [
         type: 'number',
         required: false,
         defaultValue: -12,
-        controlType: 'range',
-        controlOptions: {
+        control: {
+            type: 'range',
             unit: 'px',
             min: -24,
             max: 24,
         },
     },
-    {
-        key: 'enableGridX',
-        help: 'Enable/disable x grid.',
-        type: 'boolean',
-        required: false,
-        defaultValue: defaults.enableGridX,
-        controlType: 'switch',
-        group: 'Grid & Axes',
-    },
-    {
-        key: 'gridXValues',
-        group: 'Grid & Axes',
-        help: 'Specify values to use for vertical grid lines.',
-        type: 'Array<number | string | Date>',
-        required: false,
-    },
-    {
-        key: 'enableGridY',
-        help: 'Enable/disable y grid.',
-        type: 'boolean',
-        required: false,
-        defaultValue: defaults.enableGridY,
-        controlType: 'switch',
-        group: 'Grid & Axes',
-    },
-    {
-        key: 'gridYValues',
-        group: 'Grid & Axes',
-        help: 'Specify values to use for horizontal grid lines.',
-        type: 'Array<number | string | Date>',
-        required: false,
-    },
-    ...axesProperties(),
-    {
-        key: 'isInteractive',
+    ...chartGrid({
+        flavors: allFlavors,
+        values: true,
+        xDefault: defaults.enableGridX,
+        yDefault: defaults.enableGridY,
+    }),
+    ...axes({ flavors: allFlavors }),
+    isInteractive({
         flavors: ['svg', 'canvas'],
-        help: 'Enable/disable interactivity.',
-        type: 'boolean',
-        required: false,
         defaultValue: defaults.isInteractive,
-        controlType: 'switch',
-        group: 'Interactivity',
-    },
+        help: [
+            'Enable/disable interactivity.',
+            'Using `enableSlices` will enable a crosshair on the `x` or `y` axis, that will move between the nearest slice to the mouse/touch point, and will show a tooltip of all data points for that slice.',
+            'Using `useMesh` will use a voronoi mesh to detect the closest point to the mouse cursor/touch point, which is useful for very dense datasets, as it can become difficult to hover a specific point, however, it will only return one data point.',
+        ].join(' '),
+    }),
     {
         key: 'useMesh',
         flavors: ['svg'],
@@ -441,7 +398,7 @@ const props: ChartProperty[] = [
         type: 'boolean',
         required: false,
         defaultValue: defaults.useMesh,
-        controlType: 'switch',
+        control: { type: 'switch' },
         group: 'Interactivity',
     },
     {
@@ -451,7 +408,7 @@ const props: ChartProperty[] = [
         type: 'boolean',
         required: false,
         defaultValue: defaults.debugMesh,
-        controlType: 'switch',
+        control: { type: 'switch' },
         group: 'Interactivity',
     },
     {
@@ -487,6 +444,33 @@ const props: ChartProperty[] = [
         required: false,
     },
     {
+        key: 'onTouchStart',
+        flavors: ['svg'],
+        group: 'Interactivity',
+        help: `onTouchStart handler, when a touch gesture is started inside the graph.`,
+        type: '(point, event) => void',
+        required: false,
+    },
+    {
+        key: 'onTouchMove',
+        flavors: ['svg'],
+        group: 'Interactivity',
+        help: [
+            'onTouchMove handler, when a touch gesture that originated from inside the graph is moved.',
+            'Note, when using slices, this will return the originally touched slice, not the slice currently being hovered over (use document.elementFromPoint()).',
+        ].join(' '),
+        type: '(point, event) => void',
+        required: false,
+    },
+    {
+        key: 'onTouchEnd',
+        flavors: ['svg'],
+        group: 'Interactivity',
+        help: `onTouchEnd handler, when a touch gesture that originated from inside the graph ends.`,
+        type: '(point, event) => void',
+        required: false,
+    },
+    {
         key: 'tooltip',
         flavors: ['svg', 'canvas'],
         group: 'Interactivity',
@@ -502,8 +486,8 @@ const props: ChartProperty[] = [
         type: `'x' | 'y' | false`,
         required: false,
         defaultValue: defaults.enableSlicesTooltip,
-        controlType: 'choices',
-        controlOptions: {
+        control: {
+            type: 'choices',
             choices: [
                 {
                     label: 'false',
@@ -527,7 +511,7 @@ const props: ChartProperty[] = [
         type: 'boolean',
         required: false,
         defaultValue: defaults.debugSlices,
-        controlType: 'switch',
+        control: { type: 'switch' },
         group: 'Interactivity',
     },
     {
@@ -545,8 +529,25 @@ const props: ChartProperty[] = [
         help: 'Enable/disable crosshair.',
         type: 'boolean',
         required: false,
-        controlType: 'switch',
+        control: { type: 'switch' },
         defaultValue: defaults.enableCrosshair,
+    },
+    {
+        key: 'enableTouchCrosshair',
+        flavors: ['svg'],
+        group: 'Interactivity',
+        help: `Enables the crosshair to be dragged around a touch screen.`,
+        type: 'boolean',
+        defaultValue: defaults.enableTouchCrosshair,
+        control: { type: 'switch' },
+    },
+    {
+        key: 'initialHiddenIds',
+        flavors: allFlavors,
+        group: 'Interactivity',
+        help: `Hides certain series by default given their ids`,
+        type: 'string[]',
+        defaultValue: defaults.initialHiddenIds,
     },
     {
         key: 'crosshairType',
@@ -556,8 +557,8 @@ const props: ChartProperty[] = [
         defaultValue: defaults.crosshairType,
         help: `Crosshair type, forced to slices axis if enabled.`,
         type: 'string',
-        controlType: 'choices',
-        controlOptions: {
+        control: {
+            type: 'choices',
             disabled: true,
             choices: [
                 'x',
@@ -583,13 +584,14 @@ const props: ChartProperty[] = [
         type: 'object[]',
         help: `Optional chart's legends.`,
         group: 'Legends',
-        controlType: 'array',
-        controlOptions: {
+        required: false,
+        control: {
+            type: 'array',
             props: getLegendsProps(['svg', 'canvas']),
             shouldCreate: true,
             addLabel: 'add legend',
             shouldRemove: true,
-            getItemTitle: (index, legend) =>
+            getItemTitle: (index, legend: any) =>
                 `legend[${index}]: ${legend.anchor}, ${legend.direction}`,
             defaults: {
                 anchor: 'left',
@@ -604,8 +606,8 @@ const props: ChartProperty[] = [
                 symbolShape: 'circle',
                 itemDirection: 'left-to-right',
                 itemTextColor: '#777',
-                onClick: data => {
-                    alert(JSON.stringify(data, null, '    '))
+                onClick: (data: any) => {
+                    console.log(JSON.stringify(data, null, '    '))
                 },
                 effects: [
                     {
@@ -619,7 +621,7 @@ const props: ChartProperty[] = [
             },
         },
     },
-    ...motionProperties(['svg'], defaults, 'react-spring'),
+    ...motionProperties(['svg'], defaults),
 ]
 
 export const groups = groupProperties(props)

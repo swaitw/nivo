@@ -15,6 +15,7 @@ export const computeCartesianTicks = <Value extends ScaleValue>({
     tickSize,
     tickPadding,
     tickRotation,
+    truncateTickAt,
     engine = 'svg',
 }: {
     axis: 'x' | 'y'
@@ -24,6 +25,7 @@ export const computeCartesianTicks = <Value extends ScaleValue>({
     tickSize: number
     tickPadding: number
     tickRotation: number
+    truncateTickAt?: number
     engine?: 'svg' | 'canvas'
 }) => {
     const values = getScaleTicks<Value>(scale, tickValues)
@@ -79,13 +81,26 @@ export const computeCartesianTicks = <Value extends ScaleValue>({
         }
     }
 
-    const ticks = values.map(value => ({
-        key: typeof value === 'number' || typeof value === 'string' ? value : `${value}`,
-        value,
-        ...translate(value),
-        ...line,
-        ...text,
-    }))
+    const truncateTick = (value: string) => {
+        const valueLength = String(value).length
+
+        if (truncateTickAt && truncateTickAt > 0 && valueLength > truncateTickAt) {
+            return `${String(value).slice(0, truncateTickAt).concat('...')}`
+        }
+        return `${value}`
+    }
+
+    const ticks = values.map((value: Value) => {
+        const processedValue =
+            typeof value === 'string' ? (truncateTick(value) as unknown as Value) : value
+        return {
+            key: value instanceof Date ? `${value.valueOf()}` : `${value}`,
+            value: processedValue,
+            ...translate(value),
+            ...line,
+            ...text,
+        }
+    })
 
     return {
         ticks,
@@ -106,7 +121,7 @@ export const getFormatter = <Value extends ScaleValue>(
         return ((d: any) => formatter(d instanceof Date ? d : new Date(d))) as ValueFormatter<Value>
     }
 
-    return (d3Format(format) as unknown) as ValueFormatter<Value>
+    return d3Format(format) as unknown as ValueFormatter<Value>
 }
 
 export const computeGridLines = <Value extends ScaleValue>({
@@ -128,15 +143,15 @@ export const computeGridLines = <Value extends ScaleValue>({
 
     const lines: Line[] =
         axis === 'x'
-            ? values.map(value => ({
-                  key: `${value}`,
+            ? values.map((value: Value) => ({
+                  key: value instanceof Date ? `${value.valueOf()}` : `${value}`,
                   x1: position(value) ?? 0,
                   x2: position(value) ?? 0,
                   y1: 0,
                   y2: height,
               }))
-            : values.map(value => ({
-                  key: `${value}`,
+            : values.map((value: Value) => ({
+                  key: value instanceof Date ? `${value.valueOf()}` : `${value}`,
                   x1: 0,
                   x2: width,
                   y1: position(value) ?? 0,

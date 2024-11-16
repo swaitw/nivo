@@ -1,13 +1,4 @@
-/*
- * This file is part of the nivo project.
- *
- * Copyright 2016-present, Raphaël Benitte.
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
 import { memo } from 'react'
-import PropTypes from 'prop-types'
 import { getLabelGenerator, DotsItem, useTheme } from '@nivo/core'
 
 const Points = ({ points, symbol, size, borderWidth, enableLabel, label, labelYOffset }) => {
@@ -18,19 +9,22 @@ const Points = ({ points, symbol, size, borderWidth, enableLabel, label, labelYO
      * We reverse the `points` array so that points from the lower lines in stacked lines
      * graph are drawn on top. See https://github.com/plouc/nivo/issues/1051.
      */
-    const mappedPoints = points.reverse().map(point => {
-        const mappedPoint = {
-            id: point.id,
-            x: point.x,
-            y: point.y,
-            datum: point.data,
-            fill: point.color,
-            stroke: point.borderColor,
-            label: enableLabel ? getLabel(point.data) : null,
-        }
+    const mappedPoints = points
+        .slice(0)
+        .reverse()
+        .map(point => {
+            const mappedPoint = {
+                id: point.id,
+                x: point.x,
+                y: point.y,
+                datum: point.data,
+                fill: point.color,
+                stroke: point.borderColor,
+                label: enableLabel ? getLabel(point) : null,
+            }
 
-        return mappedPoint
-    })
+            return mappedPoint
+        })
 
     return (
         <g>
@@ -52,18 +46,6 @@ const Points = ({ points, symbol, size, borderWidth, enableLabel, label, labelYO
             ))}
         </g>
     )
-}
-
-Points.propTypes = {
-    points: PropTypes.arrayOf(PropTypes.object),
-    symbol: PropTypes.func,
-    size: PropTypes.number.isRequired,
-    color: PropTypes.func.isRequired,
-    borderWidth: PropTypes.number.isRequired,
-    borderColor: PropTypes.func.isRequired,
-    enableLabel: PropTypes.bool.isRequired,
-    label: PropTypes.oneOfType([PropTypes.string, PropTypes.func]).isRequired,
-    labelYOffset: PropTypes.number,
 }
 
 export default memo(Points)

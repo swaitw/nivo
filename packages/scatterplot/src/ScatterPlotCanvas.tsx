@@ -1,7 +1,17 @@
-import { createElement, useRef, useState, useEffect, useCallback, useMemo } from 'react'
+import {
+    ForwardedRef,
+    createElement,
+    forwardRef,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+    MouseEvent,
+} from 'react'
 import { Container, useDimensions, useTheme, getRelativeCursor, isCursorInRect } from '@nivo/core'
 import { renderAnnotationsToCanvas } from '@nivo/annotations'
-import { CanvasAxisProp, renderAxesToCanvas, renderGridLinesToCanvas } from '@nivo/axes'
+import { CanvasAxisProps, renderAxesToCanvas, renderGridLinesToCanvas } from '@nivo/axes'
 import { renderLegendToCanvas } from '@nivo/legends'
 import { useTooltip } from '@nivo/tooltip'
 import { useVoronoiMesh, renderVoronoiToCanvas, renderVoronoiCellToCanvas } from '@nivo/voronoi'
@@ -12,7 +22,9 @@ import { ScatterPlotCanvasProps, ScatterPlotDatum, ScatterPlotNodeData } from '.
 type InnerScatterPlotCanvasProps<RawDatum extends ScatterPlotDatum> = Omit<
     ScatterPlotCanvasProps<RawDatum>,
     'renderWrapper' | 'theme'
->
+> & {
+    canvasRef: ForwardedRef<HTMLCanvasElement>
+}
 
 const InnerScatterPlotCanvas = <RawDatum extends ScatterPlotDatum>({
     data,
@@ -46,6 +58,7 @@ const InnerScatterPlotCanvas = <RawDatum extends ScatterPlotDatum>({
     onClick,
     tooltip = canvasDefaultProps.tooltip,
     legends = canvasDefaultProps.legends,
+    canvasRef,
 }: InnerScatterPlotCanvasProps<RawDatum>) => {
     const canvasEl = useRef<HTMLCanvasElement | null>(null)
     const theme = useTheme()
@@ -116,7 +129,7 @@ const InnerScatterPlotCanvas = <RawDatum extends ScatterPlotDatum>({
                     renderGridLinesToCanvas<RawDatum['x']>(ctx, {
                         width: innerWidth,
                         height: innerHeight,
-                        scale: xScale as any,
+                        scale: xScale,
                         axis: 'x',
                         values: gridXValues,
                     })
@@ -125,7 +138,7 @@ const InnerScatterPlotCanvas = <RawDatum extends ScatterPlotDatum>({
                     renderGridLinesToCanvas<RawDatum['y']>(ctx, {
                         width: innerWidth,
                         height: innerHeight,
-                        scale: yScale as any,
+                        scale: yScale,
                         axis: 'y',
                         values: gridYValues,
                     })
@@ -136,14 +149,14 @@ const InnerScatterPlotCanvas = <RawDatum extends ScatterPlotDatum>({
                 })
             } else if (layer === 'axes') {
                 renderAxesToCanvas<RawDatum['x'], RawDatum['y']>(ctx, {
-                    xScale: xScale as any,
-                    yScale: yScale as any,
+                    xScale: xScale,
+                    yScale: yScale,
                     width: innerWidth,
                     height: innerHeight,
-                    top: axisTop as CanvasAxisProp<RawDatum['x']>,
-                    right: axisRight as CanvasAxisProp<RawDatum['y']>,
-                    bottom: axisBottom as CanvasAxisProp<RawDatum['x']>,
-                    left: axisLeft as CanvasAxisProp<RawDatum['y']>,
+                    top: axisTop as CanvasAxisProps<RawDatum['x']>,
+                    right: axisRight as CanvasAxisProps<RawDatum['y']>,
+                    bottom: axisBottom as CanvasAxisProps<RawDatum['x']>,
+                    left: axisLeft as CanvasAxisProps<RawDatum['y']>,
                     theme,
                 })
             } else if (layer === 'nodes') {
@@ -151,7 +164,7 @@ const InnerScatterPlotCanvas = <RawDatum extends ScatterPlotDatum>({
                     renderNode(ctx, node)
                 })
             } else if (layer === 'mesh') {
-                if (debugMesh === true) {
+                if (debugMesh) {
                     renderVoronoiToCanvas(ctx, voronoi!)
                     if (currentNode) {
                         renderVoronoiCellToCanvas(ctx, voronoi!, currentNode.index)
@@ -200,12 +213,13 @@ const InnerScatterPlotCanvas = <RawDatum extends ScatterPlotDatum>({
         debugMesh,
         voronoi,
         currentNode,
+        boundAnnotations,
     ])
 
     const { showTooltipFromEvent, hideTooltip } = useTooltip()
 
     const getNodeFromMouseEvent = useCallback(
-        event => {
+        (event: MouseEvent<HTMLCanvasElement>) => {
             const [x, y] = getRelativeCursor(canvasEl.current!, event)
             if (!isCursorInRect(margin.left, margin.top, innerWidth, innerHeight, x, y)) return null
 
@@ -216,7 +230,7 @@ const InnerScatterPlotCanvas = <RawDatum extends ScatterPlotDatum>({
     )
 
     const handleMouseHover = useCallback(
-        event => {
+        (event: MouseEvent<HTMLCanvasElement>) => {
             const node = getNodeFromMouseEvent(event)
             setCurrentNode(node)
 
@@ -249,7 +263,7 @@ const InnerScatterPlotCanvas = <RawDatum extends ScatterPlotDatum>({
     )
 
     const handleMouseLeave = useCallback(
-        event => {
+        (event: MouseEvent<HTMLCanvasElement>) => {
             hideTooltip()
             setCurrentNode(null)
             currentNode && onMouseLeave && onMouseLeave(currentNode, event)
@@ -258,7 +272,7 @@ const InnerScatterPlotCanvas = <RawDatum extends ScatterPlotDatum>({
     )
 
     const handleClick = useCallback(
-        event => {
+        (event: MouseEvent<HTMLCanvasElement>) => {
             if (onClick) {
                 const node = getNodeFromMouseEvent(event)
                 node && onClick(node, event)
@@ -269,7 +283,10 @@ const InnerScatterPlotCanvas = <RawDatum extends ScatterPlotDatum>({
 
     return (
         <canvas
-            ref={canvasEl}
+            ref={canvas => {
+                canvasEl.current = canvas
+                if (canvasRef && 'current' in canvasRef) canvasRef.current = canvas
+            }}
             width={outerWidth * pixelRatio}
             height={outerHeight * pixelRatio}
             style={{
@@ -285,13 +302,13 @@ const InnerScatterPlotCanvas = <RawDatum extends ScatterPlotDatum>({
     )
 }
 
-export const ScatterPlotCanvas = <RawDatum extends ScatterPlotDatum>({
-    isInteractive,
-    renderWrapper,
-    theme,
-    ...props
-}: ScatterPlotCanvasProps<RawDatum>) => (
-    <Container {...{ isInteractive, renderWrapper, theme }} animate={false}>
-        <InnerScatterPlotCanvas<RawDatum> {...props} />
-    </Container>
+export const ScatterPlotCanvas = forwardRef(
+    <RawDatum extends ScatterPlotDatum>(
+        { isInteractive, renderWrapper, theme, ...props }: ScatterPlotCanvasProps<RawDatum>,
+        ref: ForwardedRef<HTMLCanvasElement>
+    ) => (
+        <Container {...{ isInteractive, renderWrapper, theme }} animate={false}>
+            <InnerScatterPlotCanvas<RawDatum> {...props} canvasRef={ref} />
+        </Container>
+    )
 )

@@ -1,8 +1,9 @@
 import { AriaAttributes, FunctionComponent, MouseEvent } from 'react'
 import { Area, Line } from 'd3-shape'
-import { Box, Theme, Dimensions, ModernMotionProps, ValueFormat } from '@nivo/core'
+import { Box, Theme, Dimensions, MotionProps, ValueFormat } from '@nivo/core'
 import { InheritedColorConfig, OrdinalColorScaleConfig } from '@nivo/colors'
 import { AnnotationMatcher } from '@nivo/annotations'
+import { PartTooltipProps } from './PartTooltip'
 
 export interface FunnelDatum {
     id: string | number
@@ -116,6 +117,7 @@ export interface FunnelCommonProps<D extends FunnelDatum> {
     onMouseLeave: FunnelPartEventHandler<D>
     onMouseMove: FunnelPartEventHandler<D>
     onClick: FunnelPartEventHandler<D>
+    tooltip: (props: PartTooltipProps<D>) => JSX.Element
 
     renderWrapper: boolean
 
@@ -130,4 +132,4 @@ export interface FunnelCommonProps<D extends FunnelDatum> {
 export type FunnelSvgProps<D extends FunnelDatum> = Partial<FunnelCommonProps<D>> &
     FunnelDataProps<D> &
     Dimensions &
-    ModernMotionProps
+    MotionProps

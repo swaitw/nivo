@@ -1,4 +1,6 @@
-import { filter, isNumber, omit } from 'lodash'
+import filter from 'lodash/filter'
+import isNumber from 'lodash/isNumber'
+import omit from 'lodash/omit'
 import {
     radiansToDegrees,
     absoluteAngleDegrees,
@@ -7,7 +9,6 @@ import {
 } from '@nivo/core'
 import { defaultProps } from './props'
 import {
-    AnnotationSpec,
     AnnotationPositionGetter,
     AnnotationDimensionsGetter,
     BoundAnnotation,
@@ -27,8 +28,8 @@ export const bindAnnotations = <
     getPosition,
     getDimensions,
 }: {
-    data: Datum[]
-    annotations: AnnotationMatcher<Datum>[]
+    data: readonly Datum[]
+    annotations: readonly AnnotationMatcher<Datum>[]
     getPosition: AnnotationPositionGetter<Datum>
     getDimensions: AnnotationDimensionsGetter<Datum>
 }): BoundAnnotation<Datum>[] =>
@@ -89,7 +90,7 @@ export const getLinkAngle = (
 }
 
 export const computeAnnotation = <Datum>(
-    annotation: Required<AnnotationSpec<Datum>>
+    annotation: BoundAnnotation<Datum>
 ): AnnotationInstructions => {
     const {
         x,

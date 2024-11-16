@@ -1,11 +1,3 @@
-/*
- * This file is part of the nivo project.
- *
- * Copyright 2016-present, Raphaël Benitte.
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
 import { Fragment, useState } from 'react'
 import {
     bindDefs,
@@ -20,25 +12,41 @@ import { Axes, Grid } from '@nivo/axes'
 import { BoxLegendSvg } from '@nivo/legends'
 import { Crosshair } from '@nivo/tooltip'
 import { useLine } from './hooks'
-import { LinePropTypes, LineDefaultProps } from './props'
 import Areas from './Areas'
 import Lines from './Lines'
 import Slices from './Slices'
 import Points from './Points'
 import Mesh from './Mesh'
+import PointTooltip from './PointTooltip'
+import SliceTooltip from './SliceTooltip'
 
 const Line = props => {
     const {
         data,
-        xScale: xScaleSpec,
+        xScale: xScaleSpec = { type: 'point' },
         xFormat,
-        yScale: yScaleSpec,
+        yScale: yScaleSpec = {
+            type: 'linear',
+            min: 0,
+            max: 'auto',
+        },
         yFormat,
-        layers,
-        curve,
-        areaBaselineValue,
+        layers = [
+            'grid',
+            'markers',
+            'axes',
+            'areas',
+            'crosshair',
+            'lines',
+            'points',
+            'slices',
+            'mesh',
+            'legends',
+        ],
+        curve = 'linear',
+        areaBaselineValue = 0,
 
-        colors,
+        colors = { scheme: 'nivo' },
 
         margin: partialMargin,
         width,
@@ -46,55 +54,60 @@ const Line = props => {
 
         axisTop,
         axisRight,
-        axisBottom,
-        axisLeft,
-        enableGridX,
-        enableGridY,
+        axisBottom = {},
+        axisLeft = {},
+        enableGridX = true,
+        enableGridY = true,
         gridXValues,
         gridYValues,
 
-        lineWidth,
-        enableArea,
-        areaOpacity,
-        areaBlendMode,
+        lineWidth = 2,
+        enableArea = false,
+        areaOpacity = 0.2,
+        areaBlendMode = 'normal',
 
-        enablePoints,
+        enablePoints = true,
         pointSymbol,
-        pointSize,
-        pointColor,
-        pointBorderWidth,
-        pointBorderColor,
-        enablePointLabel,
-        pointLabel,
+        pointSize = 6,
+        pointColor = { from: 'color' },
+        pointBorderWidth = 0,
+        pointBorderColor = { theme: 'background' },
+        enablePointLabel = false,
+        pointLabel = 'data.yFormatted',
         pointLabelYOffset,
 
-        defs,
-        fill,
+        defs = [],
+        fill = [],
 
         markers,
 
-        legends,
+        legends = [],
 
-        isInteractive,
+        isInteractive = true,
 
-        useMesh,
-        debugMesh,
+        useMesh = false,
+        debugMesh = false,
 
         onMouseEnter,
         onMouseMove,
         onMouseLeave,
         onClick,
+        onTouchStart,
+        onTouchMove,
+        onTouchEnd,
 
-        tooltip,
+        tooltip = PointTooltip,
 
-        enableSlices,
-        debugSlices,
-        sliceTooltip,
+        enableSlices = false,
+        debugSlices = false,
+        sliceTooltip = SliceTooltip,
 
-        enableCrosshair,
-        crosshairType,
+        enableCrosshair = true,
+        crosshairType = 'bottom-left',
+        enableTouchCrosshair = false,
 
-        role,
+        role = 'img',
+        initialHiddenIds = [],
     } = props
 
     const { margin, innerWidth, innerHeight, outerWidth, outerHeight } = useDimensions(
@@ -127,6 +140,7 @@ const Line = props => {
         pointColor,
         pointBorderColor,
         enableSlices,
+        initialHiddenIds,
     })
 
     const theme = useTheme()
@@ -220,6 +234,13 @@ const Line = props => {
                 tooltip={sliceTooltip}
                 current={currentSlice}
                 setCurrent={setCurrentSlice}
+                onMouseEnter={onMouseEnter}
+                onMouseMove={onMouseMove}
+                onMouseLeave={onMouseLeave}
+                onClick={onClick}
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
             />
         )
     }
@@ -282,7 +303,11 @@ const Line = props => {
                 onMouseMove={onMouseMove}
                 onMouseLeave={onMouseLeave}
                 onClick={onClick}
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
                 tooltip={tooltip}
+                enableTouchCrosshair={enableTouchCrosshair}
                 debug={debugMesh}
             />
         )
@@ -325,8 +350,5 @@ const Line = props => {
         </SvgWrapper>
     )
 }
-
-Line.propTypes = LinePropTypes
-Line.defaultProps = LineDefaultProps
 
 export default withContainer(Line)

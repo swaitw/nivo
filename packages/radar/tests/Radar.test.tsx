@@ -1,8 +1,9 @@
 import { mount } from 'enzyme'
+import { LegendProps, BoxLegendSvg } from '@nivo/legends'
 // @ts-ignore
-import { Radar, RadarSvgProps } from '../src'
-import { RadarSliceTooltipProps } from '../dist/types'
-import { LegendProps } from '@nivo/legends'
+import { Radar, RadarSvgProps, RadarSliceTooltipProps } from '../src'
+import { act, create } from 'react-test-renderer'
+import { RadarSlice } from '../src/RadarSlice'
 
 type TestDatum = {
     A: number
@@ -45,6 +46,23 @@ it('should render a basic radar chart', () => {
     expect(layer1.prop('item')).toBe('B')
     const layer1path = layer1.find('path')
     expect(layer1path.prop('fill')).toBe('rgba(244, 117, 96, 1)')
+})
+
+describe('layout', () => {
+    it('should support global rotation', () => {
+        const wrapperA = mount(<Radar<TestDatum> {...baseProps} rotation={90} />)
+        const wrapperB = mount(<Radar<TestDatum> {...baseProps} rotation={-90} />)
+        // the two first labels in the two components should have the same text content
+        const labelA0 = wrapperA.find('RadarGridLabels').at(0)
+        const labelB0 = wrapperB.find('RadarGridLabels').at(0)
+        // but positions should be opposite each other on the x axis, equal position on y axis
+        const getPos = (transformString: string) =>
+            transformString.replace('translate(', '').replace(')', '').split(', ')
+        const posA0 = getPos(labelA0.find('g').first().prop('transform') as string)
+        const posB0 = getPos(labelB0.find('g').first().prop('transform') as string)
+        expect(Number(posB0[0])).toBeCloseTo(-Number(posA0[0]), 4)
+        expect(Number(posB0[1])).toBeCloseTo(Number(posA0[1]), 4)
+    })
 })
 
 describe('data', () => {
@@ -172,8 +190,8 @@ describe('legend', () => {
         const legends = [baseLegend]
         const wrapper = mount(<Radar {...baseProps} legends={legends} />)
 
-        expect(wrapper.find('BoxLegendSvg').find('text').at(0).text()).toBe(keys[0])
-        expect(wrapper.find('BoxLegendSvg').find('text').at(1).text()).toBe(keys[1])
+        expect(wrapper.find(BoxLegendSvg).find('text').at(0).text()).toBe(keys[0])
+        expect(wrapper.find(BoxLegendSvg).find('text').at(1).text()).toBe(keys[1])
     })
 
     it('show custom legend label when legend data size is 1', () => {
@@ -184,8 +202,8 @@ describe('legend', () => {
         ]
         const wrapper = mount(<Radar {...baseProps} legends={legends} />)
 
-        expect(wrapper.find('BoxLegendSvg').find('text').at(0).text()).toBe(customLabels.A)
-        expect(wrapper.find('BoxLegendSvg').find('text').at(1).text()).toBe(customLabels.B)
+        expect(wrapper.find(BoxLegendSvg).find('text').at(0).text()).toBe(customLabels.A)
+        expect(wrapper.find(BoxLegendSvg).find('text').at(1).text()).toBe(customLabels.B)
     })
 
     it('show custom legend label when legend data size is 2 over', () => {
@@ -200,9 +218,25 @@ describe('legend', () => {
         ]
         const wrapper = mount(<Radar {...baseProps} legends={legends} />)
 
-        expect(wrapper.find('BoxLegendSvg').find('text').at(0).text()).toBe(customLabels[0].A)
-        expect(wrapper.find('BoxLegendSvg').find('text').at(1).text()).toBe(customLabels[0].B)
-        expect(wrapper.find('BoxLegendSvg').find('text').at(2).text()).toBe(customLabels[1].A)
-        expect(wrapper.find('BoxLegendSvg').find('text').at(3).text()).toBe(customLabels[1].B)
+        expect(wrapper.find(BoxLegendSvg).find('text').at(0).text()).toBe(customLabels[0].A)
+        expect(wrapper.find(BoxLegendSvg).find('text').at(1).text()).toBe(customLabels[0].B)
+        expect(wrapper.find(BoxLegendSvg).find('text').at(2).text()).toBe(customLabels[1].A)
+        expect(wrapper.find(BoxLegendSvg).find('text').at(3).text()).toBe(customLabels[1].B)
+    })
+})
+
+describe('interactivity', () => {
+    it('should support onClick handler', async () => {
+        const onClick = jest.fn()
+        const instance = create(<Radar<TestDatum> {...baseProps} onClick={onClick} />).root
+        await act(() => {
+            instance.findAllByType(RadarSlice)[0].findByType('path').props.onClick()
+        })
+        expect(onClick).toHaveBeenCalledTimes(1)
+        const [datum] = onClick.mock.calls[0]
+        expect(datum).toHaveProperty('A')
+        expect(datum).toHaveProperty('B')
+        expect(datum).not.toHaveProperty('C')
+        expect(datum).toHaveProperty('category')
     })
 })

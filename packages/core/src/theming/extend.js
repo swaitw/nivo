@@ -10,29 +10,39 @@ import merge from 'lodash/merge'
 import get from 'lodash/get'
 import set from 'lodash/set'
 
-const fontProps = [
+const textPropsWithInheritance = [
     'axis.ticks.text',
     'axis.legend.text',
+    'legends.title.text',
     'legends.text',
+    'legends.ticks.text',
+    'legends.title.text',
     'labels.text',
     'dots.text',
     'markers.text',
     'annotations.text',
 ]
 
+/**
+ * @param {Partial<TextStyle>} partialStyle
+ * @param {TextStyle} rootStyle
+ * @returns {TextStyle}
+ */
+export const inheritRootThemeText = (partialStyle, rootStyle) => ({
+    ...rootStyle,
+    ...partialStyle,
+})
+
+/**
+ * @param {ThemeWithoutInheritance} defaultTheme
+ * @param {Theme} customTheme
+ * @returns {CompleteTheme}
+ */
 export const extendDefaultTheme = (defaultTheme, customTheme) => {
     const theme = merge({}, defaultTheme, customTheme)
 
-    fontProps.forEach(prop => {
-        if (get(theme, `${prop}.fontFamily`) === undefined) {
-            set(theme, `${prop}.fontFamily`, theme.fontFamily)
-        }
-        if (get(theme, `${prop}.fontSize`) === undefined) {
-            set(theme, `${prop}.fontSize`, theme.fontSize)
-        }
-        if (get(theme, `${prop}.fill`) === undefined) {
-            set(theme, `${prop}.fill`, theme.textColor)
-        }
+    textPropsWithInheritance.forEach(prop => {
+        set(theme, prop, inheritRootThemeText(get(theme, prop), theme.text))
     })
 
     return theme
