@@ -5,7 +5,7 @@ import {
     Theme,
     CssMixBlendMode,
     Dimensions,
-    ModernMotionProps,
+    MotionProps,
     PropertyAccessor,
     ValueFormat,
     ClosedCurveFactoryId,
@@ -90,6 +90,8 @@ export interface RadarCommonProps<D extends Record<string, unknown>> {
     // second argument passed to the formatter is the key
     valueFormat: ValueFormat<number, string>
 
+    rotation: number
+
     layers: (RadarLayerId | RadarCustomLayer<D>)[]
 
     margin: Box
@@ -141,7 +143,17 @@ export interface RadarSvgFillMatcherDatum<D extends Record<string, unknown>> {
 export type RadarSvgProps<D extends Record<string, unknown>> = Partial<RadarCommonProps<D>> &
     RadarDataProps<D> &
     Dimensions &
-    ModernMotionProps &
-    SvgDefsAndFill<RadarSvgFillMatcherDatum<D>>
+    MotionProps &
+    SvgDefsAndFill<RadarSvgFillMatcherDatum<D>> &
+    RadarHandlers<D, SVGPathElement>
 
 export type BoundLegendProps = Required<Pick<LegendProps, 'data'>> & Omit<LegendProps, 'data'>
+
+export type MouseEventHandler<RawDatum, ElementType = HTMLCanvasElement> = (
+    datum: RawDatum,
+    event: React.MouseEvent<ElementType>
+) => void
+
+export type RadarHandlers<RawDatum, ElementType> = {
+    onClick?: MouseEventHandler<RawDatum, ElementType>
+}

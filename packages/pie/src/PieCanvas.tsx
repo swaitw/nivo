@@ -13,10 +13,10 @@ import {
     drawCanvasArcLinkLabels,
 } from '@nivo/arcs'
 import { useNormalizedData, usePieFromBox } from './hooks'
-import { ComputedDatum, PieCanvasProps } from './types'
+import { ComputedDatum, PieCanvasProps, MayHaveLabel } from './types'
 import { defaultProps } from './props'
 
-const InnerPieCanvas = <RawDatum,>({
+const InnerPieCanvas = <RawDatum extends MayHaveLabel>({
     data,
     id = defaultProps.id,
     value = defaultProps.value,
@@ -35,7 +35,7 @@ const InnerPieCanvas = <RawDatum,>({
     width,
     height,
     margin: partialMargin,
-    pixelRatio = 1,
+    pixelRatio = defaultProps.pixelRatio,
 
     colors = defaultProps.colors,
 
@@ -67,8 +67,12 @@ const InnerPieCanvas = <RawDatum,>({
     onClick,
     onMouseMove,
     tooltip = defaultProps.tooltip,
+    activeId: activeIdFromProps,
+    onActiveIdChange,
+    defaultActiveId,
 
     legends = defaultProps.legends,
+    forwardLegendData,
 }: PieCanvasProps<RawDatum>) => {
     const canvasEl = useRef<HTMLCanvasElement | null>(null)
     const theme = useTheme()
@@ -87,28 +91,25 @@ const InnerPieCanvas = <RawDatum,>({
         colors,
     })
 
-    const {
-        dataWithArc,
-        arcGenerator,
-        centerX,
-        centerY,
-        radius,
-        innerRadius,
-        setActiveId,
-    } = usePieFromBox<RawDatum>({
-        data: normalizedData,
-        width: innerWidth,
-        height: innerHeight,
-        fit,
-        innerRadius: innerRadiusRatio,
-        startAngle,
-        endAngle,
-        padAngle,
-        sortByValue,
-        cornerRadius,
-        activeInnerRadiusOffset,
-        activeOuterRadiusOffset,
-    })
+    const { dataWithArc, arcGenerator, centerX, centerY, radius, innerRadius, setActiveId } =
+        usePieFromBox<RawDatum>({
+            data: normalizedData,
+            width: innerWidth,
+            height: innerHeight,
+            fit,
+            innerRadius: innerRadiusRatio,
+            startAngle,
+            endAngle,
+            padAngle,
+            sortByValue,
+            cornerRadius,
+            activeInnerRadiusOffset,
+            activeOuterRadiusOffset,
+            activeId: activeIdFromProps,
+            onActiveIdChange,
+            defaultActiveId,
+            forwardLegendData,
+        })
 
     const getBorderColor = useInheritedColor<ComputedDatum<RawDatum>>(borderColor, theme)
 
@@ -206,6 +207,7 @@ const InnerPieCanvas = <RawDatum,>({
         centerY,
         arcGenerator,
         dataWithArc,
+        borderWidth,
         getBorderColor,
         enableArcLabels,
         arcLabels,
@@ -290,7 +292,7 @@ const InnerPieCanvas = <RawDatum,>({
     )
 }
 
-export const PieCanvas = <RawDatum,>({
+export const PieCanvas = <RawDatum extends MayHaveLabel>({
     isInteractive = defaultProps.isInteractive,
     theme,
     renderWrapper,

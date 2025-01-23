@@ -4,7 +4,7 @@ import { lineRadial, CurveFactory } from 'd3-shape'
 import { ScaleLinear } from 'd3-scale'
 import { useMotionConfig, useTheme, useAnimatedPath } from '@nivo/core'
 import { useInheritedColor } from '@nivo/colors'
-import { RadarCommonProps } from './types'
+import { RadarCommonProps, RadarSvgProps } from './types'
 
 interface RadarLayerProps<D extends Record<string, unknown>> {
     data: D[]
@@ -12,12 +12,14 @@ interface RadarLayerProps<D extends Record<string, unknown>> {
     colorByKey: Record<string | number, string>
     fillByKey: Record<string, string | null>
     radiusScale: ScaleLinear<number, number>
+    rotation: number
     angleStep: number
     curveFactory: CurveFactory
     borderWidth: RadarCommonProps<D>['borderWidth']
     borderColor: RadarCommonProps<D>['borderColor']
     fillOpacity: RadarCommonProps<D>['fillOpacity']
     blendMode: RadarCommonProps<D>['blendMode']
+    onClick?: RadarSvgProps<D>['onClick']
 }
 
 export const RadarLayer = <D extends Record<string, unknown>>({
@@ -26,6 +28,7 @@ export const RadarLayer = <D extends Record<string, unknown>>({
     colorByKey,
     fillByKey,
     radiusScale,
+    rotation,
     angleStep,
     curveFactory,
     borderWidth,
@@ -39,9 +42,9 @@ export const RadarLayer = <D extends Record<string, unknown>>({
     const lineGenerator = useMemo(() => {
         return lineRadial<number>()
             .radius(d => radiusScale(d))
-            .angle((_, i) => i * angleStep)
+            .angle((_, i) => rotation + i * angleStep)
             .curve(curveFactory)
-    }, [radiusScale, angleStep, curveFactory])
+    }, [radiusScale, rotation, angleStep, curveFactory])
 
     const { animate, config: springConfig } = useMotionConfig()
     const animatedPath = useAnimatedPath(lineGenerator(data.map(d => d[key] as number)) as string)

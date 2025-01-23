@@ -5,12 +5,12 @@ import {
     Box,
     Theme,
     ValueFormat,
-    ModernMotionProps,
+    MotionProps,
     CssMixBlendMode,
     CartesianMarkerProps,
     PropertyAccessor,
 } from '@nivo/core'
-import { ScaleSpec } from '@nivo/scales'
+import { AnyScale, ScaleSpec } from '@nivo/scales'
 import { OrdinalColorScaleConfig } from '@nivo/colors'
 import { AxisProps, GridValues } from '@nivo/axes'
 import { LegendProps } from '@nivo/legends'
@@ -84,8 +84,8 @@ export type ScatterPlotLayerId =
     | 'legends'
     | 'annotations'
 export interface ScatterPlotLayerProps<RawDatum extends ScatterPlotDatum> {
-    xScale: any
-    yScale: any
+    xScale: AnyScale
+    yScale: AnyScale
     nodes: ScatterPlotNodeData<RawDatum>[]
     innerWidth: number
     innerHeight: number
@@ -158,7 +158,7 @@ export type ScatterPlotSvgProps<RawDatum extends ScatterPlotDatum> = Partial<
 > &
     ScatterPlotDataProps<RawDatum> &
     Dimensions &
-    ModernMotionProps & {
+    MotionProps & {
         blendMode?: CssMixBlendMode
         layers?: (ScatterPlotLayerId | ScatterPlotCustomSvgLayer<RawDatum>)[]
         nodeComponent?: ScatterPlotNode<RawDatum>

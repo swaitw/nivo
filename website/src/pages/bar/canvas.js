@@ -5,6 +5,7 @@ import meta from '../../data/components/bar/meta.yml'
 import { generateHeavyDataSet } from '../../data/components/bar/generator'
 import mapper from '../../data/components/bar/mapper'
 import { groups } from '../../data/components/bar/props'
+import { graphql, useStaticQuery } from 'gatsby'
 
 const Tooltip = data => {
     /* return custom tooltip */
@@ -52,6 +53,7 @@ const initialProperties = {
         tickRotation: 0,
         legend: '',
         legendOffset: 36,
+        truncateTickAt: 0,
     },
     axisRight: {
         enable: false,
@@ -60,6 +62,7 @@ const initialProperties = {
         tickRotation: 0,
         legend: '',
         legendOffset: 0,
+        truncateTickAt: 0,
     },
     axisBottom: {
         enable: true,
@@ -69,6 +72,7 @@ const initialProperties = {
         legend: 'country',
         legendPosition: 'middle',
         legendOffset: 36,
+        truncateTickAt: 0,
     },
     axisLeft: {
         enable: true,
@@ -78,18 +82,23 @@ const initialProperties = {
         legend: 'food',
         legendPosition: 'middle',
         legendOffset: -40,
+        truncateTickAt: 0,
     },
 
     enableGridX: true,
     enableGridY: false,
 
     enableLabel: true,
+    enableTotals: false,
+    totalsOffset: 10,
     labelSkipWidth: 12,
     labelSkipHeight: 12,
     labelTextColor: {
         from: 'color',
         modifiers: [['darker', 1.6]],
     },
+    labelPosition: 'middle',
+    labelOffset: 0,
 
     isInteractive: true,
     'custom tooltip example': false,
@@ -99,6 +108,20 @@ const initialProperties = {
 }
 
 const BarCanvas = () => {
+    const {
+        image: {
+            childImageSharp: { gatsbyImageData: image },
+        },
+    } = useStaticQuery(graphql`
+        query {
+            image: file(absolutePath: { glob: "**/src/assets/captures/bar-canvas.png" }) {
+                childImageSharp {
+                    gatsbyImageData(layout: FIXED, width: 700, quality: 100)
+                }
+            }
+        }
+    `)
+
     return (
         <ComponentTemplate
             name="BarCanvas"
@@ -116,6 +139,7 @@ const BarCanvas = () => {
             })}
             generateData={generateHeavyDataSet}
             getTabData={data => data.data}
+            image={image}
         >
             {(properties, data, theme, logAction) => {
                 return (

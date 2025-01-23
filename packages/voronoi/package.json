@@ -1,47 +1,45 @@
 {
-  "name": "@nivo/voronoi",
-  "version": "0.74.1",
-  "license": "MIT",
-  "author": {
-    "name": "Raphaël Benitte",
-    "url": "https://github.com/plouc"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/plouc/nivo.git",
-    "directory": "packages/voronoi"
-  },
-  "keywords": [
-    "nivo",
-    "dataviz",
-    "react",
-    "d3",
-    "charts",
-    "voronoi"
-  ],
-  "main": "./dist/nivo-voronoi.cjs.js",
-  "module": "./dist/nivo-voronoi.es.js",
-  "typings": "./dist/types/index.d.ts",
-  "files": [
-    "README.md",
-    "LICENSE.md",
-    "dist/",
-    "!dist/tsconfig.tsbuildinfo"
-  ],
-  "dependencies": {
-    "d3-delaunay": "^5.3.0",
-    "d3-scale": "^3.2.3"
-  },
-  "devDependencies": {
-    "@nivo/core": "0.74.1",
-    "@types/d3-delaunay": "^5.3.0",
-    "@types/d3-scale": "^3.2.2"
-  },
-  "peerDependencies": {
-    "@nivo/core": "0.74.1",
-    "react": ">= 16.14.0 < 18.0.0"
-  },
-  "publishConfig": {
-    "access": "public"
-  }
+    "name": "@nivo/voronoi",
+    "version": "0.88.0",
+    "license": "MIT",
+    "author": {
+        "name": "Raphaël Benitte",
+        "url": "https://github.com/plouc"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/plouc/nivo.git",
+        "directory": "packages/voronoi"
+    },
+    "keywords": [
+        "nivo",
+        "dataviz",
+        "react",
+        "d3",
+        "charts",
+        "voronoi"
+    ],
+    "main": "./dist/nivo-voronoi.cjs.js",
+    "module": "./dist/nivo-voronoi.es.js",
+    "types": "./dist/types/index.d.ts",
+    "files": [
+        "README.md",
+        "LICENSE.md",
+        "dist/",
+        "!dist/tsconfig.tsbuildinfo"
+    ],
+    "dependencies": {
+        "@nivo/core": "workspace:*",
+        "@nivo/tooltip": "workspace:0.88.0",
+        "@types/d3-delaunay": "^6.0.4",
+        "@types/d3-scale": "^4.0.8",
+        "d3-delaunay": "^6.0.4",
+        "d3-scale": "^4.0.2"
+    },
+    "peerDependencies": {
+        "react": ">= 16.14.0 < 19.0.0"
+    },
+    "publishConfig": {
+        "access": "public"
+    }
 }

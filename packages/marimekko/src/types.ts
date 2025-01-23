@@ -6,8 +6,8 @@ import {
     stackOffsetSilhouette,
     stackOffsetWiggle,
 } from 'd3-shape'
-import { ScaleLinear } from 'd3-scale'
-import { Box, Dimensions, Theme, SvgDefsAndFill, ModernMotionProps, ValueFormat } from '@nivo/core'
+import { ScaleLinear } from '@nivo/scales'
+import { Box, Dimensions, Theme, SvgDefsAndFill, MotionProps, ValueFormat } from '@nivo/core'
 import { AxisProps } from '@nivo/axes'
 import { OrdinalColorScaleConfig, InheritedColorConfig } from '@nivo/colors'
 import { LegendProps } from '@nivo/legends'
@@ -18,14 +18,16 @@ export type DatumFormattedValue = string | number
 
 export type DatumPropertyAccessor<RawDatum, T> = (datum: RawDatum) => T
 
+export type RawDimensionDatum<RawDatum> = {
+    id: string
+    value: string | number | DatumPropertyAccessor<RawDatum, DatumValue>
+}
+
 export interface DataProps<RawDatum> {
-    data: RawDatum[]
+    data: readonly RawDatum[]
     id: string | number | DatumPropertyAccessor<RawDatum, DatumId>
     value: string | number | DatumPropertyAccessor<RawDatum, DatumValue>
-    dimensions: {
-        id: string
-        value: string | number | DatumPropertyAccessor<RawDatum, DatumValue>
-    }[]
+    dimensions: readonly RawDimensionDatum<RawDatum>[]
     valueFormat?: ValueFormat<number>
 }
 
@@ -45,6 +47,7 @@ export interface DimensionDatum<RawDatum> {
     y: number
     width: number
     height: number
+    dimension: RawDimensionDatum<RawDatum>
     datum: ComputedDatum<RawDatum>
 }
 
@@ -53,7 +56,7 @@ export interface ComputedDatum<RawDatum> extends NormalizedDatum<RawDatum> {
     y: number
     width: number
     height: number
-    dimensions: DimensionDatum<RawDatum>[]
+    dimensions: readonly DimensionDatum<RawDatum>[]
 }
 
 export interface BarDatum<RawDatum> extends DimensionDatum<RawDatum> {
@@ -68,10 +71,10 @@ export type LabelAccessorFunction<RawDatum> = (datum: ComputedDatum<RawDatum>) =
 export type LayerId = 'grid' | 'axes' | 'bars' | 'legends'
 
 export interface CustomLayerProps<RawDatum> {
-    data: ComputedDatum<RawDatum>[]
-    bars: BarDatum<RawDatum>[]
-    thicknessScale: ScaleLinear<number, number>
-    dimensionsScale: ScaleLinear<number, number>
+    data: readonly ComputedDatum<RawDatum>[]
+    bars: readonly BarDatum<RawDatum>[]
+    thicknessScale: ScaleLinear<number>
+    dimensionsScale: ScaleLinear<number>
 }
 
 export type CustomLayer<RawDatum> = React.FC<CustomLayerProps<RawDatum>>
@@ -119,9 +122,9 @@ export type CommonProps<RawDatum> = {
     axisBottom?: AxisProps | null
     axisLeft?: AxisProps | null
     enableGridX: boolean
-    gridXValues?: number[]
+    gridXValues?: readonly number[]
     enableGridY: boolean
-    gridYValues?: number[]
+    gridYValues?: readonly number[]
 
     // colors, theme and border
     colors: OrdinalColorScaleConfig<Omit<DimensionDatum<RawDatum>, 'color' | 'fill'>>
@@ -140,7 +143,7 @@ export type CommonProps<RawDatum> = {
     isInteractive: boolean
     tooltip: BarTooltipType<RawDatum>
 
-    legends: LegendProps[]
+    legends: readonly LegendProps[]
 
     role: string
 }
@@ -160,8 +163,8 @@ export type MouseEventHandlers<RawDatum, ElementType> = Partial<{
 export type SvgProps<RawDatum> = DataProps<RawDatum> &
     Dimensions &
     Partial<CommonProps<RawDatum>> &
-    ModernMotionProps &
+    MotionProps &
     SvgDefsAndFill<BarDatum<RawDatum>> &
     MouseEventHandlers<RawDatum, SVGRectElement> & {
-        layers?: Layer<RawDatum>[]
+        layers?: readonly Layer<RawDatum>[]
     }

@@ -2,7 +2,7 @@ import { FunctionComponent, AriaAttributes } from 'react'
 import {
     Box,
     Dimensions,
-    ModernMotionProps,
+    MotionProps,
     Theme,
     PropertyAccessor,
     StackOrder,
@@ -14,12 +14,13 @@ import {
 import { AxisProps, GridValues } from '@nivo/axes'
 import { InheritedColorConfig, OrdinalColorScaleConfig } from '@nivo/colors'
 import { LegendProps } from '@nivo/legends'
+import { ScaleLinear, ScalePoint } from '@nivo/scales'
 
 export type StreamLayerId = 'grid' | 'axes' | 'layers' | 'dots' | 'slices' | 'legends'
 
 export interface StreamCustomLayerProps {
-    xScale: any
-    yScale: any
+    xScale: ScalePoint<number>
+    yScale: ScaleLinear<number>
     layers: StreamLayerData[]
     slices: StreamSliceData[]
 }
@@ -30,9 +31,7 @@ export interface StreamDatum {
     [key: string]: string | number
 }
 
-export type StackFunc<RawDatum extends StreamDatum> = (
-    data: RawDatum[]
-) => {
+export type StackFunc<RawDatum extends StreamDatum> = (data: RawDatum[]) => {
     0: number
     1: number
     data: RawDatum
@@ -146,4 +145,4 @@ export type StreamSvgProps<RawDatum extends StreamDatum> = Partial<StreamCommonP
     StreamDataProps<RawDatum> &
     SvgDefsAndFill<StreamLayerData> &
     Dimensions &
-    ModernMotionProps
+    MotionProps

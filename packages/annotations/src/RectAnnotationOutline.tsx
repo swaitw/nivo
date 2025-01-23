@@ -6,11 +6,13 @@ export const RectAnnotationOutline = ({
     y,
     width,
     height,
+    borderRadius = 6,
 }: {
     x: number
     y: number
     width: number
     height: number
+    borderRadius?: number
 }) => {
     const theme = useTheme()
     const { animate, config: springConfig } = useMotionConfig()
@@ -30,6 +32,8 @@ export const RectAnnotationOutline = ({
                 <animated.rect
                     x={animatedProps.x}
                     y={animatedProps.y}
+                    rx={borderRadius}
+                    ry={borderRadius}
                     width={animatedProps.width}
                     height={animatedProps.height}
                     style={{
@@ -39,12 +43,15 @@ export const RectAnnotationOutline = ({
                             theme.annotations.outline.strokeWidth +
                             theme.annotations.outline.outlineWidth * 2,
                         stroke: theme.annotations.outline.outlineColor,
+                        opacity: theme.annotations.outline.outlineOpacity,
                     }}
                 />
             )}
             <animated.rect
                 x={animatedProps.x}
                 y={animatedProps.y}
+                rx={borderRadius}
+                ry={borderRadius}
                 width={animatedProps.width}
                 height={animatedProps.height}
                 style={theme.annotations.outline}

@@ -3,9 +3,10 @@ import {
     Theme,
     Box,
     Dimensions,
-    ModernMotionProps,
+    MotionProps,
     PropertyAccessor,
     ValueFormat,
+    SvgDefsAndFill,
 } from '@nivo/core'
 import { Arc, ArcGenerator, ArcLabelsProps, ArcTransitionMode } from '@nivo/arcs'
 import { InheritedColorConfig, OrdinalColorScaleConfig } from '@nivo/colors'
@@ -123,4 +124,5 @@ export type RadialBarSvgProps<D extends RadialBarDatum = RadialBarDatum> = Parti
 > &
     RadialBarDataProps<D> &
     Dimensions &
-    ModernMotionProps
+    MotionProps &
+    SvgDefsAndFill<D>

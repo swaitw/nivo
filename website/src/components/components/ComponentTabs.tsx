@@ -1,7 +1,6 @@
 import React, { PropsWithChildren, useState } from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import media from '../../theming/mediaQueries'
-import { useTheme } from '../../theming/context'
 import { Highlight } from '../Highlight'
 import { CodeBlock } from '../CodeBlock'
 
@@ -161,7 +160,9 @@ const Nav = styled.nav`
     `}
 `
 
-const NavItem = styled.span`
+const NavItem = styled.span<{
+    isCurrent: boolean
+}>`
     cursor: pointer;
     height: 46px;
     display: block;
